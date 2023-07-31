@@ -10,18 +10,67 @@ phone_number = ReplyKeyboardMarkup(
     one_time_keyboard=True
 )
 
-degree = ReplyKeyboardMarkup(
+grade = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Maktabda")
+            KeyboardButton(text="Maktabda o'qiyman")
         ],
         [
-            KeyboardButton(text="Universitetda")
+            KeyboardButton(text="Maktabni bitirganman")
         ],
         [
-            KeyboardButton(text="Bitirganman")
+            KeyboardButton(text="Universitetda o'qiyman")
         ]
     ],
     resize_keyboard=True,
     one_time_keyboard=True
 )
+
+school = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="9")
+        ],
+        [
+            KeyboardButton(text="10")
+        ],
+        [
+            KeyboardButton(text="11")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
+university = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="1")
+        ],
+        [
+            KeyboardButton(text="2")
+        ],
+        [
+            KeyboardButton(text="3")
+        ],
+        [
+            KeyboardButton(text="4")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
+degree = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Bakalavr")
+        ],
+        [
+            KeyboardButton(text="Magistratura")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+

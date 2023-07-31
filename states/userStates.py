@@ -9,3 +9,7 @@ class UserState(StatesGroup):
     degree = State()
     test_score = State()
     confirmation = State()
+
+class GradeStates(StatesGroup):
+    school = State()
+    university = State()
