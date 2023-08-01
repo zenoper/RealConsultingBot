@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loader import dp, bot
-from states.userStates import UserState, GradeStates
+from states.userStates import UserState, GradeStates, TestStates
 
 from keyboards.default import UserKeyboard
 from aiogram.types import ReplyKeyboardRemove, CallbackQuery
@@ -57,6 +57,7 @@ async def school(message: types.Message):
     await message.answer("Nechinchi sinfda o'qiysiz?", reply_markup=UserKeyboard.school)
     await GradeStates.school.set()
 
+
 @dp.message_handler(state=GradeStates.school)
 async def school(message: types.Message, state: FSMContext):
     grade = message.text
@@ -70,10 +71,12 @@ async def school(message: types.Message, state: FSMContext):
     await message.answer("Tanlang:", reply_markup=UserKeyboard.degree)
     await UserState.degree.set()
 
+
 @dp.message_handler(text="Universitetda o'qiyman", state=UserState.grade)
 async def university(message: types.Message):
     await message.answer("Nechinchi kursda o'qiysiz?", reply_markup=UserKeyboard.university)
     await GradeStates.university.set()
+
 
 @dp.message_handler(state=GradeStates.university)
 async def university(message: types.Message, state: FSMContext):
@@ -82,16 +85,108 @@ async def university(message: types.Message, state: FSMContext):
     await message.answer("Tanlang:", reply_markup=UserKeyboard.degree)
     await UserState.degree.set()
 
+
 @dp.message_handler(state=UserState.degree)
 async def degree(message: types.Message, state: FSMContext):
-    degree = message.text
-    await state.update_data({"degree": degree})
-    await message.answer("What is your IELTS / Duolingo Score ?")
+    degreee = message.text
+    await state.update_data({"degree": degreee})
+    await message.answer("Do you have IELTS or Duolingo score? \nChoose the one you have highest score from!", reply_markup=UserKeyboard.test_score)
     await UserState.test_score.set()
 
-@dp.message_handler(state=UserState.test_score)
-async def test_score(message: types.Message, state: FSMContext):
-    test_score = message.text
-    await state.update_data({"test_score": test_score})
-    await message.answer("TO BE CONTINUED!")
+
+@dp.message_handler(text="IELTS", state=UserState.test_score)
+async def test_score(message: types.Message):
+    await message.answer("What is your IELTS score?")
+    await TestStates.ielts.set()
+
+
+@dp.message_handler(state=TestStates.ielts)
+async def ielts(message: types.Message, state: FSMContext):
+    ielts = message.text
+    await state.update_data({"test_score": f"{ielts} IELTS"})
+
+    data = await state.get_data()
+    full_name = data.get("fullname")
+    date_of_birth = data.get("date_of_birth")
+    phone_number = data.get("phone_number")
+    grade = data.get("grade")
+    degree = data.get("degree")
+    test_score = data.get("test_score")
+
+    msg = "Please, confirm your personal info is correct: \n \n"
+    msg += f"Fullname - {full_name} \n"
+    msg += f"Date of birth - {date_of_birth} \n"
+    msg += f"Phone Number - {phone_number} \n"
+    msg += f"O'quv yilingiz - {grade} \n"
+    msg += f"Qaysi darajada o'qimoqchisiz? - {degree} \n"
+    msg += f"Test natijangiz - {test_score}"
+
+    await message.answer(msg, reply_markup=UserKeyboard.confirmation)
     await UserState.confirmation.set()
+
+
+@dp.message_handler(text="Duolingo", state=UserState.test_score)
+async def test_score(message: types.Message):
+    await message.answer("What is your Duolingo score?")
+    await TestStates.duolingo.set()
+
+
+@dp.message_handler(state=TestStates.duolingo)
+async def ielts(message: types.Message, state: FSMContext):
+    duolingo = message.text
+    await state.update_data({"test_score": f"{duolingo} Duolingo"})
+
+    data = await state.get_data()
+    full_name = data.get("fullname")
+    date_of_birth = data.get("date_of_birth")
+    phone_number = data.get("phone_number")
+    grade = data.get("grade")
+    degree = data.get("degree")
+    test_score = data.get("test_score")
+
+    msg = "Please, confirm your personal info is correct: \n \n"
+    msg += f"Fullname - {full_name} \n"
+    msg += f"Date of birth - {date_of_birth} \n"
+    msg += f"Phone Number - {phone_number} \n"
+    msg += f"O'quv yilingiz - {grade} \n"
+    msg += f"Qaysi darajada o'qimoqchisiz? - {degree} \n"
+    msg += f"Test natijangiz - {test_score} \n"
+
+    await message.answer(msg, reply_markup=UserKeyboard.confirmation)
+    await UserState.confirmation.set()
+
+
+@dp.message_handler(text="None", state=UserState.test_score)
+async def test_score(message: types.Message, state: FSMContext):
+    await state.update_data({"test_score": "None"})
+
+    data = await state.get_data()
+    full_name = data.get("fullname")
+    date_of_birth = data.get("date_of_birth")
+    phone_number = data.get("phone_number")
+    grade = data.get("grade")
+    degree = data.get("degree")
+    test_score = data.get("test_score")
+
+    msg = "Please, confirm your personal info is correct: \n \n"
+    msg += f"Fullname - {full_name} \n"
+    msg += f"Date of birth - {date_of_birth} \n"
+    msg += f"Phone Number - {phone_number} \n"
+    msg += f"O'quv yilingiz - {grade} \n"
+    msg += f"Qaysi darajada o'qimoqchisiz? - {degree} \n"
+    msg += f"Test natijangiz - {test_score}"
+
+    await message.answer(msg, reply_markup=UserKeyboard.confirmation)
+    await UserState.confirmation.set()
+
+@dp.message_handler(text="Confirm! ✅", state=UserState.confirmation)
+async def confirmation(message: types.Message):
+    await message.answer("Thank you for cooperation! \nPlease, wait for our feedback!")
+    await UserState.waiting.set()
+
+
+@dp.message_handler(tex="Edit ✏️", state=UserState.confirmation)
+async def edit(message: types.Message):
+    await message.answer("Iltimos, to'liq ismingizni kiriting!")
+    await UserState.fullname.set()
+

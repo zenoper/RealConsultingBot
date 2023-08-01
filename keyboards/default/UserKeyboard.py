@@ -74,3 +74,34 @@ degree = ReplyKeyboardMarkup(
     one_time_keyboard=True
 )
 
+test_score = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="IELTS")
+        ],
+        [
+            KeyboardButton(text="Duolingo")
+        ],
+        [
+            KeyboardButton(text="None")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
+confirmation = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Confirm! ✅")
+        ],
+        [
+            KeyboardButton(text="Edit ✏️")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
+
+
