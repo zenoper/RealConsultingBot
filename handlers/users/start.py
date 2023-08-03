@@ -7,5 +7,5 @@ from states.userStates import UserState
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
-    await message.answer(f"Assalamu alaykum, {message.from_user.full_name}!\n Iltimos, to'liq ismingizni kiriting!")
+    await message.answer(f"Assalamu alaykum, <b>{message.from_user.full_name}</b>! 🙂\n \nIltimos, to'liq ismingizni kiriting! \n\nPlease, fill in your full name!")
     await UserState.fullname.set()

@@ -3,7 +3,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 phone_number = ReplyKeyboardMarkup(
     keyboard = [
         [
-            KeyboardButton(text="raqam jo'natish 📱", request_contact=True)
+            KeyboardButton(text="raqam jo'natish | send phone number 📱", request_contact=True)
         ],
     ],
     resize_keyboard=True,
@@ -13,13 +13,13 @@ phone_number = ReplyKeyboardMarkup(
 grade = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Maktabda o'qiyman")
+            KeyboardButton(text="Maktabda o'qiyman | At high school")
         ],
         [
-            KeyboardButton(text="Maktabni bitirganman")
+            KeyboardButton(text="Maktabni bitirganman | In a gap year")
         ],
         [
-            KeyboardButton(text="Universitetda o'qiyman")
+            KeyboardButton(text="Universitetda o'qiyman | At university")
         ]
     ],
     resize_keyboard=True,
@@ -64,10 +64,10 @@ university = ReplyKeyboardMarkup(
 degree = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Bakalavr")
+            KeyboardButton(text="Bakalavr | Bachelor's")
         ],
         [
-            KeyboardButton(text="Magistratura")
+            KeyboardButton(text="Magistratura | Master's")
         ]
     ],
     resize_keyboard=True,
@@ -83,7 +83,7 @@ test_score = ReplyKeyboardMarkup(
             KeyboardButton(text="Duolingo")
         ],
         [
-            KeyboardButton(text="None")
+            KeyboardButton(text="Yo'q/None")
         ]
     ],
     resize_keyboard=True,
@@ -93,10 +93,10 @@ test_score = ReplyKeyboardMarkup(
 confirmation = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Confirm! ✅")
+            KeyboardButton(text="Tasdiqlash/Confirm! ✅")
         ],
         [
-            KeyboardButton(text="Edit ✏️")
+            KeyboardButton(text="Tahrirlash/Edit ✏️")
         ]
     ],
     resize_keyboard=True,
