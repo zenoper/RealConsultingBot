@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "dbaf5ba4c0f0d7cd52e3b82bf66412bc17ebeb25b02fb2338c66fe7aadf912af"
+            "sha256": "49215c2e00fe118b5c4890ad03ee6301c5ec7ddc50d638859275af2f6dc0a4f1"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.10"
+            "python_version": "*"
         },
         "sources": [
             {
@@ -286,11 +286,11 @@
         },
         "environs": {
             "hashes": [
-                "sha256:a98005aab7613b6fe7a1af7192a5163f72a52d3348d3918e6c7a2a32e4012779",
-                "sha256:bf3fd6bc54fcfd7f512ddcb80a7781f0ced2b0c83dd123d619e9468ecdaaf537"
+                "sha256:1e549569a3de49c05f856f40bce86979e7d5ffbbc4398e7f338574c220189124",
+                "sha256:a76307b36fbe856bdca7ee9161e6c466fd7fcffc297109a118c59b54e27e30c9"
             ],
             "index": "pypi",
-            "version": "==8.0.0"
+            "version": "==9.5.0"
         },
         "frozenlist": {
             "hashes": [
