@@ -60,7 +60,7 @@ async def phone(message: types.Message):
     await UserState.phone_number.set()
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.phone_number)
 async def dateofbirth(message: types.Message):
-    await message.answer("Iltimos, faqatgina harflardan foydalaning! \n\nPlease, only use letters!")
+    await message.answer("Iltimos, faqatgina raqamlardan foydalaning! \n\nPlease, only use numbers!")
 
 
 @dp.message_handler(text="Maktabda o'qiyman | At high school", content_types=types.ContentTypes.TEXT, state=UserState.grade)
@@ -139,7 +139,48 @@ def is_float(value):
 async def ielts(message: types.Message, state: FSMContext):
     ielts_of = message.text
     if message.text.isdigit() or is_float(message.text):
-        await state.update_data({"test_score": f"IELTS {ielts_of}"})
+        if len(ielts_of) < 4:
+            await state.update_data({"test_score": f"IELTS {ielts_of}"})
+
+            data = await state.get_data()
+            full_name = data.get("fullname")
+            date_of_birth = data.get("date_of_birth")
+            contact_number = data.get("phone_number")
+            grade = data.get("grade")
+            degree_of = data.get("degree")
+            test_score_of = data.get("test_score")
+
+            msg = "Iltimos, shaxsiy ma'lumotingiz to'g'riligini tasdiqlang! \nPlease, confirm your personal info is correct! \n \n"
+            msg += f"To'liq ism/Full name - <b>{full_name}</b> \n\n"
+            msg += f"Tug'ilgan yilingiz/Date of birth - <b>{date_of_birth}</b> \n\n"
+            msg += f"Telefon raqamingiz/Phone Number - <b>{contact_number}</b> \n\n"
+            msg += f"O'quv yilingiz/Study year - <b>{grade}</b> \n\n"
+            msg += f"Tanlangan daraja/Chosen degree - <b>{degree_of}</b> \n\n"
+            msg += f"Test natijangiz/Test score - <b>{test_score_of}</b>"
+
+            await message.answer(msg, reply_markup=UserKeyboard.confirmation)
+            await UserState.confirmation.set()
+        else:
+            await message.answer("Javobingiz 3 xonadan oshmasligi kerak! \nMasalan: <b>6.5</b>  \n\nYour response can't have more than 3 characters! \nFor example: <b>6</b>")
+    else:
+        await message.answer("Iltimos, IELTS natijangizni to'g'ri formatda kiriting! \nMasalan: <b>6.5</b>  \n\nPlease, write your IELTS score in the correct format! \nFor example: <b>6</b>")
+
+@dp.message_handler(content_types=types.ContentTypes.ANY, state=TestStates.ielts)
+async def ielts(message: types.Message):
+    await message.answer("Iltimos, faqat raqamlardan foydalananing! \n\nPLease, only use numbers!")
+
+
+@dp.message_handler(text="Duolingo", content_types=types.ContentTypes.TEXT, state=UserState.test_score)
+async def test_score(message: types.Message):
+    await message.answer("Duolingo balingiz nechchi? \n\nWhat is your Duolingo score?")
+    await TestStates.duolingo.set()
+
+
+@dp.message_handler(lambda message: message.text.isdigit(), content_types=types.ContentTypes.TEXT, state=TestStates.duolingo)
+async def ielts(message: types.Message, state: FSMContext):
+    duolingo_of = message.text
+    if len(duolingo_of) < 4:
+        await state.update_data({"test_score": f"Duolingo {duolingo_of}"})
 
         data = await state.get_data()
         full_name = data.get("fullname")
@@ -160,48 +201,15 @@ async def ielts(message: types.Message, state: FSMContext):
         await message.answer(msg, reply_markup=UserKeyboard.confirmation)
         await UserState.confirmation.set()
     else:
-        await message.answer("Iltimos, faqat raqamlardan foydalaning! \n\nPlease, only use numbers!")
-
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=TestStates.ielts)
-async def ielts(message: types.Message):
-    await message.answer("Iltimos, faqat raqamlardan foydalananing! \n\nPLease, only use numbers!")
+        await message.answer("Javobingiz 3 xonadan oshmasligi kerak! \nMasalan: <b>135</b>  \n\nYour response can't have more than 3 characters! \nFor example: <b>125</b>")
 
 
-@dp.message_handler(text="Duolingo", content_types=types.ContentTypes.TEXT, state=UserState.test_score)
-async def test_score(message: types.Message):
-    await message.answer("Duolingo balingiz nechchi? \n\nWhat is your Duolingo score?")
-    await TestStates.duolingo.set()
-
-
-@dp.message_handler(lambda message: message.text.isdigit(), content_types=types.ContentTypes.TEXT, state=TestStates.duolingo)
-async def ielts(message: types.Message, state: FSMContext):
-    duolingo_of = message.text
-    await state.update_data({"test_score": f"Duolingo {duolingo_of}"})
-
-    data = await state.get_data()
-    full_name = data.get("fullname")
-    date_of_birth = data.get("date_of_birth")
-    contact_number = data.get("phone_number")
-    grade = data.get("grade")
-    degree_of = data.get("degree")
-    test_score_of = data.get("test_score")
-
-    msg = "Iltimos, shaxsiy ma'lumotingiz to'g'riligini tasdiqlang! \nPlease, confirm your personal info is correct! \n \n"
-    msg += f"To'liq ism/Full name - <b>{full_name}</b> \n\n"
-    msg += f"Tug'ilgan yilingiz/Date of birth - <b>{date_of_birth}</b> \n\n"
-    msg += f"Telefon raqamingiz/Phone Number - <b>{contact_number}</b> \n\n"
-    msg += f"O'quv yilingiz/Study year - <b>{grade}</b> \n\n"
-    msg += f"Tanlangan daraja/Chosen degree - <b>{degree_of}</b> \n\n"
-    msg += f"Test natijangiz/Test score - <b>{test_score_of}</b>"
-
-    await message.answer(msg, reply_markup=UserKeyboard.confirmation)
-    await UserState.confirmation.set()
 @dp.message_handler(lambda message: not message.text.isdigit(), content_types=types.ContentTypes.TEXT, state=TestStates.duolingo)
 async def ielts(message: types.Message):
-    await message.answer("Iltimos, faqat raqamlardan foydalaning! \n\nPlease, only use numbers!")
+    await message.answer("Iltimos, faqat raqamlardan foydalaning! \nMasalan: <b>135</b> \n\nPlease, only use numbers! \nFor example: <b>125</b>")
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=TestStates.duolingo)
 async def ielts(message: types.Message):
-    await message.answer("Iltimos, faqat raqamlardan foydalaning! \n\nPlease, only use numbers!")
+    await message.answer("Iltimos, faqat raqamlardan foydalaning! \nMasalan: <b>135</b> \n\nPlease, only use numbers! \nFor example: <b>125</b>")
 
 
 @dp.message_handler(text="Yo'q/None", content_types=types.ContentTypes.TEXT, state=UserState.test_score)
@@ -253,8 +261,8 @@ async def confirmation(message: types.Message, state: FSMContext):
     msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
     await bot.send_message(chat_id=ADMINS[0], text=msg)
 
-    await message.answer("Hamkorligingiz uchun rahmat!\nIltimos, sizga aloqaga chiqishimizni kuting! \n\nThank you for cooperation! \nPlease, wait for us to get in touch with you! 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
-    await UserState.waiting.set()
+    await message.answer("Hamkorligingiz uchun rahmat! \nAgar bizni talablarimizga to'g'ri kelsangiz, sizga aloqaga chiqamiz. \n\nThank you for cooperation! \nIf you meet our requirements, we will reach out to you. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
+    await state.finish()
 
 
 @dp.message_handler(text="Tahrirlash/Edit ✏️", content_types=types.ContentTypes.TEXT, state=UserState.confirmation)
