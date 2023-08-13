@@ -4,11 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-aiogram = "*"
-environs = "*"
+aiogram = "~=2.14"
+environs = "~=8.0.0"
 asyncpg = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "*"
+python_version = "3.10.2"
