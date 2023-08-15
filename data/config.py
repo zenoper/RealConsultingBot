@@ -17,7 +17,7 @@
 import os 
 BOT_TOKEN = str(os.environ.get("BOT_TOKEN"))
 ADMINS = list(os.environ.get("ADMINS"))
-IP = str(os.environ.get("ip"))
+# IP = str(os.environ.get("ip"))
 
 DB_USER = str(os.environ.get("DB_USER"))
 DB_PASS = str(os.environ.get("DB_PASS"))
