@@ -19,7 +19,7 @@ BOT_TOKEN = str(os.environ.get("BOT_TOKEN"))
 ADMINS = str(os.environ.get("ADMINS"))
 # IP = str(os.environ.get("ip"))
 
-DB_USER = str(os.environ.get("DB_USER"))
-DB_PASS = str(os.environ.get("DB_PASS"))
-DB_NAME = str(os.environ.get("DB_NAME"))
-DB_HOST = str(os.environ.get("DB_HOST"))
+DB_USER = str(os.environ.get("DATABASE_URL"))[11:25]
+DB_PASS = str(os.environ.get("DATABASE_URL"))[26:90]
+DB_NAME = str(os.environ.get("DATABASE_URL"))[0:8]
+DB_HOST = str(os.environ.get("DATABASE_URL"))[91:139]
