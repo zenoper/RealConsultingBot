@@ -49,7 +49,7 @@ class Database:
         education_degree VARCHAR(255) NOT NULL,
         test_score VARCHAR(255) NOT NULL,
         username varchar(255) NULL,
-        telegram_id BIGINT NOT NULL UNIQUE
+        telegram_id BIGINT NOT NULL
         );
         """
         await self.execute(sql, execute=True)
