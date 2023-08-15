@@ -259,7 +259,7 @@ async def confirmation(message: types.Message, state: FSMContext):
 
     count = await db.count_users()
     msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
-    await bot.send_message(chat_id=ADMINS[0], text=msg)
+    await bot.send_message(chat_id=ADMINS, text=msg)
 
     await message.answer("Hamkorligingiz uchun rahmat! \nAgar bizni talablarimizga to'g'ri kelsangiz, sizga aloqaga chiqamiz. \n\nThank you for cooperation! \nIf you meet our requirements, we will reach out to you. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
     await state.finish()
