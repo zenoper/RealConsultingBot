@@ -16,6 +16,7 @@ async def fullname(message:  types.Message, state: FSMContext):
         await message.answer("Iltimos, ism va familiyangizni <b>to'liq</b> kiriting! \n\nPlease, fill in your name and surname <b>completely</b>!")
     else:
         await state.update_data({"fullname": full_name})
+        await state.update_data({"qualification": 0})
         await message.answer("Iltimos, tug'ilgan kun, oy, va yilingizni kiriting! \n\nPlease, fill in your birthdate!")
         await UserState.date_of_birth.set()
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.fullname)
@@ -30,13 +31,31 @@ async def dateofbirth(message: types.Message, state: FSMContext):
         await message.answer("Iltimos, tug'ilgan kun, oy, va yilingizni <b>to'liq</b> kiriting! \n\nPlease, fill in your <b>complete</b> birthdate!")
     else:
         await state.update_data({"date_of_birth": date_of_birth})
-        await message.answer("Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting! \nMasalan, +998xx xxx xx xx \n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself! \nFor example, +998xx xxx xx xx", reply_markup=UserKeyboard.phone_number)
-        await UserState.phone_number.set()
+        await message.answer("O'zbekistonda istiqomat qilasizmi yoki chet-el da? \n\nDo you live in Uzbekistan or abroad?", reply_markup=UserKeyboard.intorlocal)
+        await UserState.interORlocal.set()
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.date_of_birth)
 async def dateofbirth(message: types.Message):
     await message.answer("Iltimos, faqatgina harflardan foydalaning! \n\nPlease, only use letters!")
 
+@dp.message_handler(text="O'zbekistonda | In Uzbekistan", content_types=types.ContentTypes.TEXT, state=UserState.interORlocal)
+async def intorlocal(message: types.Message):
+    await message.answer(
+        "Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting! \nMasalan, +998xx xxx xx xx \n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself! \nFor example, +998xx xxx xx xx",
+        reply_markup=UserKeyboard.phone_number)
+    await UserState.phone_number.set()
+@dp.message_handler(text="Chet-elda | Abroad", content_types=types.ContentTypes.TEXT, state=UserState.interORlocal)
+async def intorlocal(message: types.Message):
+    await message.answer(
+        "Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting!\n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself!",
+        reply_markup=UserKeyboard.phone_number)
+    await UserState.phone_number_int.set()
+@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.interORlocal)
+async def intorlocal(message: types.Message):
+    await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!", reply_markup=UserKeyboard.intorlocal)
+
+
 @dp.message_handler(content_types=types.ContentType.CONTACT, state=UserState.phone_number)
+@dp.message_handler(content_types=types.ContentType.CONTACT, state=UserState.phone_number_int)
 async def phone_number(message: types.Message, state: FSMContext):
     contact = message.contact.phone_number
     user_name = message.from_user.username
@@ -44,6 +63,18 @@ async def phone_number(message: types.Message, state: FSMContext):
     await state.update_data({'phone_number': contact, "username": user_name, "telegram_id": telegram_id})
     await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
     await UserState.grade.set()
+
+@dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number_int)
+async def phone(message: types.Message, state: FSMContext):
+    phonenumber = message.text
+    username = message.from_user.username
+    telegram_id = message.from_user.id
+    await state.update_data({'phone_number': phonenumber, "username": username, "telegram_id": telegram_id})
+    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
+    await UserState.grade.set()
+@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.phone_number_int)
+async def dateofbirth(message: types.Message):
+    await message.answer("Iltimos, faqatgina raqamlardan foydalaning! \n\nPlease, only use numbers!")
 
 phone_number_regexp = "^[+]998[389][012345789][0-9]{7}$"
 @dp.message_handler(regexp=phone_number_regexp, content_types=types.ContentTypes.TEXT, state=UserState.phone_number)
@@ -72,6 +103,11 @@ async def school(message: types.Message):
 @dp.message_handler(text="11", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
 async def school(message: types.Message, state: FSMContext):
     grade = message.text
+    if grade == "11":
+        qu_score = await state.get_data()
+        q_score = qu_score.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
     await state.update_data({'grade': f"{grade} sinf"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
     await UserState.degree.set()
@@ -82,6 +118,10 @@ async def school(message: types.Message):
 
 @dp.message_handler(text="Maktabni bitirganman | In a gap year", content_types=types.ContentTypes.TEXT, state=UserState.grade)
 async def school(message: types.Message, state: FSMContext):
+    qu_score = await state.get_data()
+    q_score = qu_score.get("qualification")
+    q_score += 1
+    await state.update_data({"qualification": q_score})
     await state.update_data({"grade": "maktabni bitirgan/gap year"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
     await UserState.degree.set()
@@ -96,12 +136,28 @@ async def university(message: types.Message):
 @dp.message_handler(text="4", content_types=types.ContentTypes.TEXT, state=GradeStates.university)
 async def university(message: types.Message, state: FSMContext):
     year = message.text
+    qu_score = await state.get_data()
+    q_score = qu_score.get("qualification")
+    q_score += 1
+    await state.update_data({"qualification": q_score})
     await state.update_data({"grade": f"{year} kurs/year"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
     await UserState.degree.set()
+
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=GradeStates.university)
 async def school(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.university)
+
+
+@dp.message_handler(text="Universitetni bitirganman | Graduated university", content_types=types.ContentTypes.TEXT,state=UserState.grade)
+async def university(message: types.Message, state: FSMContext):
+    qu_score = await state.get_data()
+    q_score = qu_score.get("qualification")
+    q_score += 1
+    await state.update_data({"qualification": q_score})
+    await state.update_data({"grade": "graduated university"})
+    await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
+    await UserState.degree.set()
 
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.grade)
 async def grade(message: types.Message):
@@ -150,6 +206,18 @@ async def ielts(message: types.Message, state: FSMContext):
             degree_of = data.get("degree")
             test_score_of = data.get("test_score")
 
+            if degree_of == "bachelor's" and float(ielts_of) >= 5.5:
+                qu_score = await state.get_data()
+                q_score = qu_score.get("qualification")
+                q_score += 1
+                await state.update_data({"qualification": q_score})
+
+            if degree_of == "master's" and float(ielts_of) >= 6:
+                qu_score = await state.get_data()
+                q_score = qu_score.get("qualification")
+                q_score += 1
+                await state.update_data({"qualification": q_score})
+
             msg = "Iltimos, shaxsiy ma'lumotingiz to'g'riligini tasdiqlang! \nPlease, confirm your personal info is correct! \n \n"
             msg += f"To'liq ism/Full name - <b>{full_name}</b> \n\n"
             msg += f"Tug'ilgan yilingiz/Date of birth - <b>{date_of_birth}</b> \n\n"
@@ -189,6 +257,18 @@ async def ielts(message: types.Message, state: FSMContext):
         grade = data.get("grade")
         degree_of = data.get("degree")
         test_score_of = data.get("test_score")
+
+        if degree_of == "bachelor's" and float(duolingo_of) >= 90:
+            qu_score = await state.get_data()
+            q_score = qu_score.get("qualification")
+            q_score += 1
+            await state.update_data({"qualification": q_score})
+
+        if degree_of == "master's" and float(duolingo_of) >= 105:
+            qu_score = await state.get_data()
+            q_score = qu_score.get("qualification")
+            q_score += 1
+            await state.update_data({"qualification": q_score})
 
         msg = "Iltimos, shaxsiy ma'lumotingiz to'g'riligini tasdiqlang! \nPlease, confirm your personal info is correct! \n \n"
         msg += f"To'liq ism/Full name - <b>{full_name}</b> \n\n"
@@ -243,26 +323,77 @@ async def score(message: types.Message):
 @dp.message_handler(text="Tasdiqlash/Confirm! ✅", content_types=types.ContentTypes.TEXT, state=UserState.confirmation)
 async def confirmation(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
-    try:
-        user = await db.add_user(
-            full_name=user_data.get("fullname"),
-            date_of_birth=user_data.get("date_of_birth"),
-            phone_number=user_data.get("phone_number"),
-            grade=user_data.get("grade"),
-            education_degree=user_data.get("degree"),
-            test_score=user_data.get("test_score"),
-            username=user_data.get("username"),
-            telegram_id=user_data.get("telegram_id")
-        )
-    except asyncpg.exceptions.UniqueViolationError:
-        user = await db.select_user(telegram_id=user_data.get("telegram_id"))
 
-    count = await db.count_users()
-    msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
-    await bot.send_message(chat_id=ADMINS, text=msg)
+    intended_degree = user_data.get("degree")
+    current_degree = user_data.get("grade")
+    if intended_degree == "bachelor's" and current_degree == "11 sinf":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    elif intended_degree == "bachelor's" and current_degree == "maktabni bitirgan/gap year":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    elif intended_degree == "bachelor's" and current_degree == "graduated university":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    if intended_degree == "bachelor's" and current_degree == "1 kurs/year":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    elif intended_degree == "bachelor's" and current_degree == "2 kurs/year":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    elif intended_degree == "bachelor's" and current_degree == "3 kurs/year":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    elif intended_degree == "bachelor's" and current_degree == "4 kurs/year":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    if intended_degree == "master's" and current_degree == "4 kurs/year":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
+    elif intended_degree == "master's" and current_degree == "graduated university":
+        q_score = user_data.get("qualification")
+        q_score += 1
+        await state.update_data({"qualification": q_score})
 
-    await message.answer("Hamkorligingiz uchun rahmat! \nAgar bizni talablarimizga to'g'ri kelsangiz, sizga aloqaga chiqamiz. \n\nThank you for cooperation! \nIf you meet our requirements, we will reach out to you. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
-    await state.finish()
+    qu_score = await state.get_data()
+    qualification_score = qu_score.get("qualification")
+    if qualification_score >= 3:
+        try:
+            user = await db.add_user(
+                full_name=user_data.get("fullname"),
+                date_of_birth=user_data.get("date_of_birth"),
+                phone_number=user_data.get("phone_number"),
+                grade=user_data.get("grade"),
+                education_degree=user_data.get("degree"),
+                test_score=user_data.get("test_score"),
+                username=user_data.get("username"),
+                telegram_id=user_data.get("telegram_id")
+            )
+        except asyncpg.exceptions.UniqueViolationError:
+            user = await db.select_user(telegram_id=user_data.get("telegram_id"))
+
+        count = await db.count_users()
+        msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
+        await bot.send_message(chat_id=ADMINS, text=msg)
+
+        await message.answer("Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. Sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. We will reach out to you soon. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
+        await state.finish()
+    else:
+        user_data = await state.get_data()
+        q_scoree = user_data.get("qualification")
+        await message.answer(
+            "Hamkorligingiz uchun rahmat! \nUzr, bizni talablarimizga to'g'ri kelmadingiz ❌. Test natijalaringiz yetarli darajada emas, yoki o'quv yilingiz va maqsadlaringiz bizning talablarimizga mos tushmaydi. \n\nThank you for cooperation! Sorry, but you don't meet our requirements ❌. Either you have a low test score or your current education level and educational goals don't suit.",
+            reply_markup=ReplyKeyboardRemove(selective=True))
+        await message.answer(" Talablar: \n\n🎓 Bakalavrga hozirda 11-sinfda o’qiyotgan yoki maktabni bitirgan bo'lishingiz kerak. \nIELTS 5.5 or above \nDuolingo 90 or above \n\n‍🎓 Magistratura uchun esa hozirda bakalavrda 4-kursda o’qiyotgan yoki allaqachon universitetni bitirgan bo’lishingiz zarur. \nIELTS 6 or above \nDuolingo 105 or above ")
+        await state.finish()
 
 
 @dp.message_handler(text="Tahrirlash/Edit ✏️", content_types=types.ContentTypes.TEXT, state=UserState.confirmation)

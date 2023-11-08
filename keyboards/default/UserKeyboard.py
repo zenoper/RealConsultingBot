@@ -1,5 +1,18 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+intorlocal = ReplyKeyboardMarkup(
+    keyboard = [
+        [
+            KeyboardButton(text="O'zbekistonda | In Uzbekistan")
+        ],
+        [
+            KeyboardButton(text="Chet-elda | Abroad")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
 phone_number = ReplyKeyboardMarkup(
     keyboard = [
         [
@@ -20,6 +33,9 @@ grade = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Universitetda o'qiyman | At university")
+        ],
+        [
+            KeyboardButton(text="Universitetni bitirganman | Graduated university")
         ]
     ],
     resize_keyboard=True,
@@ -45,15 +61,11 @@ school = ReplyKeyboardMarkup(
 university = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="1")
-        ],
-        [
+            KeyboardButton(text="1"),
             KeyboardButton(text="2")
         ],
         [
-            KeyboardButton(text="3")
-        ],
-        [
+            KeyboardButton(text="3"),
             KeyboardButton(text="4")
         ]
     ],
