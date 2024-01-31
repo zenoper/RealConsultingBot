@@ -115,5 +115,18 @@ confirmation = ReplyKeyboardMarkup(
     one_time_keyboard=True
 )
 
+b1orf1 = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="F1")
+        ],
+        [
+            KeyboardButton(text="B1/B2")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
 
 

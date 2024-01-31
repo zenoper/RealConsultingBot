@@ -17,6 +17,18 @@ class GradeStates(StatesGroup):
     school = State()
     university = State()
 
+
 class TestStates(StatesGroup):
     ielts = State()
     duolingo = State()
+
+
+class B1orF1States(StatesGroup):
+    start = State()
+    B1 = State()
+    F1 = State()
+
+
+class B1UserState(StatesGroup):
+    abroad = State()
+    countries = State()

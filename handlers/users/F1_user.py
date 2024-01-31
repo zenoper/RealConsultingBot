@@ -2,40 +2,11 @@ import asyncpg.exceptions
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loader import dp, db, bot
-from states.userStates import UserState, GradeStates, TestStates
+from states.userStates import UserState, GradeStates, TestStates, B1orF1States
 from keyboards.default import UserKeyboard
 from aiogram.types import ReplyKeyboardRemove
 from data.config import ADMINS
-import re
 
-
-@dp.message_handler(state=UserState.fullname)
-async def fullname(message:  types.Message, state: FSMContext):
-    full_name = message.text
-    if len(full_name) <= 5:
-        await message.answer("Iltimos, ism va familiyangizni <b>to'liq</b> kiriting! \n\nPlease, fill in your name and surname <b>completely</b>!")
-    else:
-        await state.update_data({"fullname": full_name})
-        await state.update_data({"qualification": 0})
-        await message.answer("Iltimos, tug'ilgan kun, oy, va yilingizni kiriting! \n\nPlease, fill in your birthdate!")
-        await UserState.date_of_birth.set()
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.fullname)
-async def fullname(message: types.Message):
-    await message.answer("Iltimos, faqatgina harflardan foydalaning! \n\nPlease, only use letters!")
-
-
-@dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.date_of_birth)
-async def dateofbirth(message: types.Message, state: FSMContext):
-    date_of_birth = message.text
-    if len(date_of_birth) <= 5:
-        await message.answer("Iltimos, tug'ilgan kun, oy, va yilingizni <b>to'liq</b> kiriting! \n\nPlease, fill in your <b>complete</b> birthdate!")
-    else:
-        await state.update_data({"date_of_birth": date_of_birth})
-        await message.answer("O'zbekistonda istiqomat qilasizmi yoki chet-el da? \n\nDo you live in Uzbekistan or abroad?", reply_markup=UserKeyboard.intorlocal)
-        await UserState.interORlocal.set()
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.date_of_birth)
-async def dateofbirth(message: types.Message):
-    await message.answer("Iltimos, faqatgina harflardan foydalaning! \n\nPlease, only use letters!")
 
 @dp.message_handler(text="O'zbekistonda | In Uzbekistan", content_types=types.ContentTypes.TEXT, state=UserState.interORlocal)
 async def intorlocal(message: types.Message):
@@ -43,12 +14,16 @@ async def intorlocal(message: types.Message):
         "Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting! \nMasalan, +998xx xxx xx xx \n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself! \nFor example, +998xx xxx xx xx",
         reply_markup=UserKeyboard.phone_number)
     await UserState.phone_number.set()
+
+
 @dp.message_handler(text="Chet-elda | Abroad", content_types=types.ContentTypes.TEXT, state=UserState.interORlocal)
 async def intorlocal(message: types.Message):
     await message.answer(
         "Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting!\n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself!",
         reply_markup=UserKeyboard.phone_number)
     await UserState.phone_number_int.set()
+
+
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.interORlocal)
 async def intorlocal(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!", reply_markup=UserKeyboard.intorlocal)
@@ -67,9 +42,8 @@ async def phone_number(message: types.Message, state: FSMContext):
 @dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number_int)
 async def phone(message: types.Message, state: FSMContext):
     phonenumber = message.text
-    username = message.from_user.username
     telegram_id = message.from_user.id
-    await state.update_data({'phone_number': phonenumber, "username": username, "telegram_id": telegram_id})
+    await state.update_data({'phone_number': phonenumber, "telegram_id": telegram_id})
     await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
     await UserState.grade.set()
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.phone_number_int)
@@ -80,9 +54,8 @@ phone_number_regexp = "^[+]998[389][012345789][0-9]{7}$"
 @dp.message_handler(regexp=phone_number_regexp, content_types=types.ContentTypes.TEXT, state=UserState.phone_number)
 async def phone(message: types.Message, state: FSMContext):
     phonenumber = message.text
-    username = message.from_user.username
     telegram_id = message.from_user.id
-    await state.update_data({'phone_number': phonenumber, "username": username, "telegram_id": telegram_id})
+    await state.update_data({'phone_number': phonenumber, "telegram_id": telegram_id})
     await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
     await UserState.grade.set()
 @dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number)
@@ -258,7 +231,7 @@ async def ielts(message: types.Message, state: FSMContext):
         degree_of = data.get("degree")
         test_score_of = data.get("test_score")
 
-        if degree_of == "bachelor's" and float(duolingo_of) >= 90:
+        if degree_of == "bachelor's" and float(duolingo_of) >= 100:
             qu_score = await state.get_data()
             q_score = qu_score.get("qualification")
             q_score += 1
