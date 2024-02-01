@@ -38,3 +38,4 @@ class B1UserState(StatesGroup):
     purpose = State()
     how_long = State()
     places_to_visit = State()
+    confirmation = State()

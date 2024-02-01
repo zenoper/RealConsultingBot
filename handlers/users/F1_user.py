@@ -2,75 +2,17 @@ import asyncpg.exceptions
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loader import dp, db, bot
-from states.userStates import UserState, GradeStates, TestStates, B1orF1States
+from states.userStates import UserState, GradeStates, TestStates
 from keyboards.default import UserKeyboard
 from aiogram.types import ReplyKeyboardRemove
 from data.config import ADMINS
-
-
-@dp.message_handler(text="O'zbekistonda | In Uzbekistan", content_types=types.ContentTypes.TEXT, state=UserState.interORlocal)
-async def intorlocal(message: types.Message):
-    await message.answer(
-        "Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting! \nMasalan, +998xx xxx xx xx \n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself! \nFor example, +998xx xxx xx xx",
-        reply_markup=UserKeyboard.phone_number)
-    await UserState.phone_number.set()
-
-
-@dp.message_handler(text="Chet-elda | Abroad", content_types=types.ContentTypes.TEXT, state=UserState.interORlocal)
-async def intorlocal(message: types.Message):
-    await message.answer(
-        "Iltimos, telefon raqamingizni jo'nating! \n<b>'jo'natish'</b> tugmasini bosing yoki o'zingiz kiriting!\n\nPlease, send your phone number! \nEither press <b>'send'</b> button or fill in yourself!",
-        reply_markup=UserKeyboard.phone_number)
-    await UserState.phone_number_int.set()
-
-
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.interORlocal)
-async def intorlocal(message: types.Message):
-    await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!", reply_markup=UserKeyboard.intorlocal)
-
-
-@dp.message_handler(content_types=types.ContentType.CONTACT, state=UserState.phone_number)
-@dp.message_handler(content_types=types.ContentType.CONTACT, state=UserState.phone_number_int)
-async def phone_number(message: types.Message, state: FSMContext):
-    contact = message.contact.phone_number
-    user_name = message.from_user.username
-    telegram_id = message.from_user.id
-    await state.update_data({'phone_number': contact, "username": user_name, "telegram_id": telegram_id})
-    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
-    await UserState.grade.set()
-
-@dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number_int)
-async def phone(message: types.Message, state: FSMContext):
-    phonenumber = message.text
-    telegram_id = message.from_user.id
-    await state.update_data({'phone_number': phonenumber, "telegram_id": telegram_id})
-    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
-    await UserState.grade.set()
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.phone_number_int)
-async def dateofbirth(message: types.Message):
-    await message.answer("Iltimos, faqatgina raqamlardan foydalaning! \n\nPlease, only use numbers!")
-
-phone_number_regexp = "^[+]998[389][012345789][0-9]{7}$"
-@dp.message_handler(regexp=phone_number_regexp, content_types=types.ContentTypes.TEXT, state=UserState.phone_number)
-async def phone(message: types.Message, state: FSMContext):
-    phonenumber = message.text
-    telegram_id = message.from_user.id
-    await state.update_data({'phone_number': phonenumber, "telegram_id": telegram_id})
-    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
-    await UserState.grade.set()
-@dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number)
-async def phone(message: types.Message):
-    await message.answer("Iltimos, to'g'ri formatdagi raqam kiriting!", reply_markup=UserKeyboard.phone_number)
-    await UserState.phone_number.set()
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.phone_number)
-async def dateofbirth(message: types.Message):
-    await message.answer("Iltimos, faqatgina raqamlardan foydalaning! \n\nPlease, only use numbers!")
 
 
 @dp.message_handler(text="Maktabda o'qiyman | At high school", content_types=types.ContentTypes.TEXT, state=UserState.grade)
 async def school(message: types.Message):
     await message.answer("Nechinchi sinfda o'qiysiz? \n\nWhat grade at high school are you in?", reply_markup=UserKeyboard.school)
     await GradeStates.school.set()
+
 @dp.message_handler(text="9", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
 @dp.message_handler(text="10", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
 @dp.message_handler(text="11", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
@@ -84,6 +26,8 @@ async def school(message: types.Message, state: FSMContext):
     await state.update_data({'grade': f"{grade} sinf"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
     await UserState.degree.set()
+
+
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=GradeStates.school)
 async def school(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.school)

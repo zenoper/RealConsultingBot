@@ -25,15 +25,14 @@ async def abroad(message: types, state: FSMContext):
 @dp.message_handler(state=B1UserState.abroad, content_types=types.ContentTypes.ANY)
 async def abroad(message: types):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
-                         reply_markup=B12UserKeyboard.countries)
-    await B1UserState.countries.set()
+                         reply_markup=B12UserKeyboard.abroad)
 
 
 @dp.message_handler(state=B1UserState.countries, content_types=types.ContentTypes.TEXT)
 async def country(message: types, state: FSMContext):
     countries = message.text
     await state.update_data({"countries": countries})
-    await message.answer("U yer(lar)da qachon bo'lgansiz? \nMasalan: Mart, 2021 \n\nWhen have you been there? \nFor example, March, 2021")
+    await message.answer("U davlat(lar)da qachon bo'lgansiz? \nMasalan: Mart, 2021 \n\nWhen have you been there? \nFor example, March, 2021")
     await B1UserState.visit_date.set()
 
 
@@ -136,20 +135,29 @@ async def type_how_long(message: types.Message, state: FSMContext):
         data = await state.get_data()
         full_name = data.get("fullname")
         birthdate = data.get("date_of_birth")
+        phone_number = data.get("phone_number")
         countries = data.get("countries")
         visit_date = data.get("visit_date")
         relatives = data.get("relatives")
+        relative_visa = data.get("relative_visa")
         purpose = data.get("purpose")
         how_long = data.get("how_long")
         username = data.get("username")
         telegram_id = data.get("telegram_id")
 
-
-
-
-
-        await message.answer("Iltimos, berilgan ma'lumotlarni tasdiqlang! \n\nPlease, confirm the submitted information!")
-        await B1UserState.places_to_visit.set()
+        msg = "Iltimos, shaxsiy ma'lumotingiz to'g'riligini tasdiqlang! \nPlease, confirm your personal info is correct! \n \n"
+        msg += f"To'liq ism/Full name - <b>{full_name}</b> \n\n"
+        msg += f"Tug'ilgan yilingiz/Date of birth - <b>{birthdate}</b> \n\n"
+        msg += f"Telefon raqamingiz/Phone Number - <b>{phone_number}</b> \n\n"
+        msg += f"Davlatlar/Countries - <b>{countries}</b> \n\n"
+        if visit_date:
+            msg += f"Tashrif sanasi/Visit Date - <b>{visit_date}</b> \n\n"
+        msg += f"Qarindoshlar/Relatives - <b>{relatives}</b> \n\n"
+        msg += f"Qarindoshlar visa turi/Relatives' visa type - <b>{relative_visa}</b> \n\n"
+        msg += f"Sayohatdan Maqsad/Purpose of trip - <b>{purpose}</b> \n\n"
+        msg += f"Sayohat davomiyligi/Trip Duration - <b>{how_long}</b> \n\n"
+        await message.answer(msg, reply_markup=B12UserKeyboard.confirmation)
+        await B1UserState.confirmation.set()
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
@@ -157,3 +165,35 @@ async def type_how_long(message: types.Message, state: FSMContext):
 @dp.message_handler(state=B1UserState.places_to_visit, content_types=types.ContentTypes.ANY)
 async def type_purpose(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+@dp.message_handler(state=B1UserState.confirmation, text="Tasdiqlash/Confirm! ✅")
+async def type_purpose(message: types, state: FSMContext):
+    user_data = await state.get_data()
+    try:
+        user = await db.add_b1user(
+            full_name=user_data.get("fullname"),
+            date_of_birth=user_data.get("date_of_birth"),
+            phone_number=user_data.get("phone_number"),
+            countries=user_data.get("countries"),
+            visit_date=user_data.get("visit_date"),
+            relatives=user_data.get("relatives"),
+            relative_visa=user_data.get("relative_visa"),
+            purpose=user_data.get("purpose"),
+            how_long=user_data.get("how_long"),
+            username=user_data.get("username"),
+            telegram_id=user_data.get("telegram_id")
+        )
+    except asyncpg.exceptions.UniqueViolationError:
+        user1 = await db.select_b1user(telegram_id=user_data.get("telegram_id"))
+        await message.answer(f"User '{user1[1]}' already exists in the database!")
+
+    count = await db.count_b1users()
+    msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
+    await bot.send_message(chat_id=ADMINS, text=msg)
+
+    await message.answer(
+        "Hamkorligingiz uchun rahmat! \nSizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nWe will reach out to you soon. 🙂",
+        reply_markup=ReplyKeyboardRemove(selective=True))
+    await state.finish()
+

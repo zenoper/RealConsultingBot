@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
-countries = ReplyKeyboardMarkup(
+abroad = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Yes/Ha")
