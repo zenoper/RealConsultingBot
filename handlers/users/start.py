@@ -35,12 +35,13 @@ async def fullname(message: types.Message):
 async def birthdate(message: types.Message, state: FSMContext):
     date_of_birth = message.text
     username = message.from_user.username
+    telegram_id = message.from_user.id
     if username:
         if len(date_of_birth) <= 5:
             await message.answer(
                 "Iltimos, tug'ilgan kun, oy, va yilingizni <b>to'liq</b> kiriting! \n\nPlease, fill in your <b>complete</b> birthdate!")
         else:
-            await state.update_data({"date_of_birth": date_of_birth, "username": username})
+            await state.update_data({"date_of_birth": date_of_birth, "username": username, "telegram_id": telegram_id})
             await message.answer("Qaysi turdagi visani olmoqchisiz? \n\nWhat is the type of visa you want to take?",
                                  reply_markup=UserKeyboard.b1orf1)
             await B1orF1States.start.set()

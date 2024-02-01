@@ -32,3 +32,9 @@ class B1orF1States(StatesGroup):
 class B1UserState(StatesGroup):
     abroad = State()
     countries = State()
+    visit_date = State()
+    relatives = State()
+    relative_visa = State()
+    purpose = State()
+    how_long = State()
+    places_to_visit = State()
