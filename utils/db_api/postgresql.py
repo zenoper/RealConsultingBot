@@ -159,7 +159,7 @@ class Database:
         sql = """
         CREATE TABLE IF NOT EXISTS Videos (
         id SERIAL PRIMARY KEY,
-        keyword VARCHAR(255) NOT NULL,
+        keyword VARCHAR(255) NOT NULL UNIQUE,
         file_id VARCHAR(255) NOT NULL
         );
         """
@@ -174,14 +174,21 @@ class Database:
         return sql, tuple(parameters.values())
 
     async def add_video(self, keyword, file_id):
-        sql = "INSERT INTO Videos(file_id, keyword) VALUES($1, $2) returning *"
+        sql = "INSERT INTO Videos(keyword, file_id) VALUES($1, $2) returning *"
         return await self.execute(sql, keyword, file_id, fetchrow=True)
 
     async def select_all_videos(self):
         sql = "SELECT * FROM Videos"
         return await self.execute(sql, fetch=True)
 
+    async def select_video(self, keyword):
+        query = "SELECT * FROM Videos WHERE keyword = $1"
+        return await self.execute(query, keyword, fetchrow=True)
+
     async def delete_video(self, keyword):
         query = "DELETE FROM Videos WHERE keyword = $1"
         await self.execute(query, keyword, execute=True)
+
+    async def drop_videos(self):
+        await self.execute("DROP TABLE Videos", execute=True)
 

@@ -2,16 +2,17 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 import asyncpg
 from aiogram.dispatcher.filters.builtin import Command
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
 from loader import dp, db
 from data.config import ADMINS
-from states.userStates import AddVideo
+from states.userStates import AddVideo, DeleteStates, UserState
 from keyboards.default.B12UserKeyboard import confirm
 
 
 @dp.message_handler(Command(["add_video"]), state="*")
 async def add_video(message: types):
-    if message.from_user.id in ADMINS[0]:
+    if str(message.from_user.id) == ADMINS[0]:
         await message.answer("Video jo'nating")
         await AddVideo.start.set()
     else:
@@ -19,6 +20,14 @@ async def add_video(message: types):
 
 
 @dp.message_handler(content_types=types.ContentTypes.VIDEO, state=AddVideo.start)
+async def add_video(message: types, state: FSMContext):
+    file_id = message.video.file_id
+    await state.update_data({"file_id": file_id})
+    await message.answer("Endi keyword jo'nating")
+    await AddVideo.end.set()
+
+
+@dp.message_handler(content_types=types.ContentTypes.DOCUMENT, state=AddVideo.start)
 async def add_video(message: types, state: FSMContext):
     file_id = message.document.file_id
     await state.update_data({"file_id": file_id})
@@ -51,7 +60,7 @@ async def add_text(message: types):
 async def add_text(message: types, state: FSMContext):
     data = await state.get_data()
     try:
-        db.add_video(
+        await db.add_video(
             keyword=data.get("keyword"),
             file_id=data.get("file_id")
         )
@@ -72,3 +81,62 @@ async def add_text(message: types):
     await message.answer("CLICK THE BUTTONS BRUUUH")
 
 
+# DELETE VIDEO
+
+@dp.message_handler(Command(["delete_video"]), state="*")
+async def add_video(message: types):
+    if str(message.from_user.id) == ADMINS[0]:
+        await DeleteStates.select.set()
+        videos = await db.select_all_videos()
+        if videos:
+            delete_video = InlineKeyboardMarkup(
+                inline_keyboard=[
+
+                ]
+            )
+            for video in videos:
+                delete_video.inline_keyboard.append([
+                    InlineKeyboardButton(text=video[1], callback_data=video[1])
+                ], )
+            await message.answer("Qaysi ma'lumotni o'chirishni istaysiz?", reply_markup=delete_video)
+        else:
+            await message.answer(
+                "Sizda hozircha hech qanday ma'lumotlar saqlamagansiz. \n\nMa'lumot qo'shish uchun /add_video buyrug'ini bering")
+            await UserState.start.set()
+    else:
+        await message.answer("You don't qualify bro :(")
+        await UserState.start.set()
+
+
+@dp.callback_query_handler(state=DeleteStates.select)
+async def delete(call: CallbackQuery):
+    callback_data = call.data
+    video = await db.select_video(keyword=str(callback_data))
+    if video:
+        delete_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="o'chirish", callback_data=video[1])
+                ],
+            ]
+        )
+        try:
+            await call.message.answer_video(video=video[2], thumb=video[2], caption=f"Kalit so'z : {video[1]}",
+                                            reply_markup=delete_keyboard)
+            await DeleteStates.delete.set()
+        except Exception as e:
+            await call.message.answer(f"Couldn't delete video bro. Here is the '{e}' mistake")
+
+    else:
+        await call.answer("Iltimos, tugmalardan birini tanlang!")
+
+
+@dp.callback_query_handler(state=DeleteStates.delete)
+async def delete(call: CallbackQuery):
+    try:
+        await db.delete_video(keyword=call.data)
+        await call.message.answer("O'chirish muvaffaqiyatli amalga oshdi!")
+        await UserState.start.set()
+    except Exception as e:
+        await call.message.answer("O'chirish amalga oshmadi. Uzr :( \n\nQaytadan harakat qilib ko'ring : /delete")
+        print(e)

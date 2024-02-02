@@ -3,6 +3,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 class UserState(StatesGroup):
     start = State()
+    results = State()
     fullname = State()
     date_of_birth = State()
     interORlocal = State()
@@ -46,3 +47,8 @@ class AddVideo(StatesGroup):
     start = State()
     end = State()
     confirm = State()
+
+
+class DeleteStates(StatesGroup):
+    select = State()
+    delete = State()
