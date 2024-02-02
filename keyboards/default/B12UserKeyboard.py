@@ -41,3 +41,17 @@ confirmation = ReplyKeyboardMarkup(
     resize_keyboard=True,
     one_time_keyboard=True
 )
+
+
+confirm = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Confirm! ✅")
+        ],
+        [
+            KeyboardButton(text="Edit ✏️")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)

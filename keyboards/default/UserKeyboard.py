@@ -1,5 +1,19 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+
+start = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Anketa to'ldirish")
+        ],
+        [
+            KeyboardButton(text="Natijalarni ko'rish")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
 intorlocal = ReplyKeyboardMarkup(
     keyboard = [
         [

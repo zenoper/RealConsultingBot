@@ -149,3 +149,39 @@ class Database:
 
     async def drop_b1users(self):
         await self.execute("DROP TABLE B1Users", execute=True)
+
+
+
+
+# add video
+
+    async def create_table_videos(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS Videos (
+        id SERIAL PRIMARY KEY,
+        keyword VARCHAR(255) NOT NULL,
+        file_id VARCHAR(255) NOT NULL
+        );
+        """
+        await self.execute(sql, execute=True)
+
+    @staticmethod
+    def format_args(sql, parameters: dict):
+        sql += " AND ".join([
+            f"{item} = ${num}" for num, item in enumerate(parameters.keys(),
+                                                          start=1)
+        ])
+        return sql, tuple(parameters.values())
+
+    async def add_video(self, keyword, file_id):
+        sql = "INSERT INTO Videos(file_id, keyword) VALUES($1, $2) returning *"
+        return await self.execute(sql, keyword, file_id, fetchrow=True)
+
+    async def select_all_videos(self):
+        sql = "SELECT * FROM Videos"
+        return await self.execute(sql, fetch=True)
+
+    async def delete_video(self, keyword):
+        query = "DELETE FROM Videos WHERE keyword = $1"
+        await self.execute(query, keyword, execute=True)
+

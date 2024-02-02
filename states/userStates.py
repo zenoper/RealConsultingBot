@@ -2,6 +2,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 
 class UserState(StatesGroup):
+    start = State()
     fullname = State()
     date_of_birth = State()
     interORlocal = State()
@@ -39,3 +40,9 @@ class B1UserState(StatesGroup):
     how_long = State()
     places_to_visit = State()
     confirmation = State()
+
+
+class AddVideo(StatesGroup):
+    start = State()
+    end = State()
+    confirm = State()

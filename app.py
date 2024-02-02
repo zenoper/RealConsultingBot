@@ -12,6 +12,7 @@ async def on_startup(dispatcher):
     # await db.drop_b1users()
     await db.create_table_users()
     await db.create_table_b1users()
+    await db.create_table_videos()
 
     # Birlamchi komandalar (/star va /help)
     await set_default_commands(dispatcher)

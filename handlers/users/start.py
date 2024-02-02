@@ -9,7 +9,19 @@ from states.userStates import UserState
 
 @dp.message_handler(CommandStart(), state="*")
 async def bot_start(message: types.Message):
-    await message.answer(f"Assalamu alaykum, <b>{message.from_user.full_name}</b>! 🙂\n \nIltimos, to'liq ism va familiyangizni kiriting! \n\nPlease, fill in your full name!")
+    await message.answer(f"Assalamu alaykum, <b>{message.from_user.full_name}</b>! 🙂\n\nTanlang: \n\nChoose:", reply_markup=UserKeyboard.start)
+    await UserState.start.set()
+
+
+@dp.message_handler(state=UserState.start, text="Anketa to'ldirish")
+async def bot_start(message: types.Message):
+    await message.answer(f"Iltimos, to'liq ism va familiyangizni kiriting! \n\nPlease, fill in your full name!")
+    await UserState.fullname.set()
+
+
+@dp.message_handler(state=UserState.start, text="Natijalarni ko'rish")
+async def bot_start(message: types.Message):
+    await message.answer(f"Iltimos, to'liq ism va familiyangizni kiriting! \n\nPlease, fill in your full name!")
     await UserState.fullname.set()
 
 
