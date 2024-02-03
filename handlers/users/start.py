@@ -159,13 +159,13 @@ async def dateofbirth(message: types.Message):
 
 
 
-@dp.message_handler(state=B1orF1States.start, text="F1")
+@dp.message_handler(state=B1orF1States.start, text="F1 STUDENT VISA")
 async def start(message: types.Message):
     await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
     await UserState.grade.set()
 
 
-@dp.message_handler(state=B1orF1States.start, text="B1/B2")
+@dp.message_handler(state=B1orF1States.start, text="B1/B2 BIZNES/TURIZM VISA")
 async def start(message: types.Message):
     await message.answer("Chet-elda oldin bo'lganmisiz? \n\nHave you been aboard?",
                          reply_markup=B12UserKeyboard.abroad)

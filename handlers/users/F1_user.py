@@ -299,7 +299,7 @@ async def confirmation(message: types.Message, state: FSMContext):
 
         count = await db.count_users()
         msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
-        await bot.send_message(chat_id=ADMINS, text=msg)
+        await bot.send_message(chat_id=ADMINS[0], text=msg)
 
         await message.answer("Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. Sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. We will reach out to you soon. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
         await state.finish()
@@ -309,7 +309,7 @@ async def confirmation(message: types.Message, state: FSMContext):
         await message.answer(
             "Hamkorligingiz uchun rahmat! \nUzr, bizni talablarimizga to'g'ri kelmadingiz ❌. Test natijalaringiz yetarli darajada emas, yoki o'quv yilingiz va maqsadlaringiz bizning talablarimizga mos tushmaydi. \n\nThank you for cooperation! Sorry, but you don't meet our requirements ❌. Either you have a low test score or your current education level and educational goals don't suit.",
             reply_markup=ReplyKeyboardRemove(selective=True))
-        await message.answer(" Talablar: \n\n🎓 Bakalavrga hozirda 11-sinfda o’qiyotgan yoki maktabni bitirgan bo'lishingiz kerak. \nIELTS 5.5 or above \nDuolingo 90 or above \n\n‍🎓 Magistratura uchun esa hozirda bakalavrda 4-kursda o’qiyotgan yoki allaqachon universitetni bitirgan bo’lishingiz zarur. \nIELTS 6 or above \nDuolingo 105 or above ")
+        await message.answer(" Talablar: \n\n🎓 Bakalavrga hozirda 11-sinfda o’qiyotgan yoki maktabni bitirgan bo'lishingiz kerak. \nIELTS 5.5 or above \nDuolingo 100 or above \n\n‍🎓 Magistratura uchun esa hozirda bakalavrda 4-kursda o’qiyotgan yoki allaqachon universitetni bitirgan bo’lishingiz zarur. \nIELTS 6 or above \nDuolingo 105 or above ")
         await state.finish()
 
 

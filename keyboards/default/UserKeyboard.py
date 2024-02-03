@@ -132,10 +132,10 @@ confirmation = ReplyKeyboardMarkup(
 b1orf1 = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="F1")
+            KeyboardButton(text="F1 STUDENT VISA")
         ],
         [
-            KeyboardButton(text="B1/B2")
+            KeyboardButton(text="B1/B2 BIZNES/TURIZM VISA")
         ]
     ],
     resize_keyboard=True,

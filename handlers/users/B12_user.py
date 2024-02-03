@@ -190,10 +190,10 @@ async def type_purpose(message: types, state: FSMContext):
 
     count = await db.count_b1users()
     msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
-    await bot.send_message(chat_id=ADMINS, text=msg)
+    await bot.send_message(chat_id=ADMINS[0], text=msg)
 
     await message.answer(
-        "Hamkorligingiz uchun rahmat! \nSizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nWe will reach out to you soon. 🙂",
+        "Hamkorligingiz uchun rahmat! \nTalablarimizga to’g’ri kelsangiz, sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nWe will reach out to you soon if you meet our requirements. 🙂",
         reply_markup=ReplyKeyboardRemove(selective=True))
     await state.finish()
 
