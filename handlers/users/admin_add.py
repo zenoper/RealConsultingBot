@@ -1,6 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 import asyncpg
+import aiogram
 from aiogram.dispatcher.filters.builtin import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
@@ -44,16 +45,33 @@ async def add_video(message: types):
 async def add_text(message: types, state: FSMContext):
     keyword = message.text
     await state.update_data({"keyword": keyword})
-    data_info = await state.get_data()
-    file_id = data_info.get("file_id")
-    await message.answer_document(document=file_id, thumb=file_id, caption=f"\nKalit so'z : <b>{keyword}</b>")
-    await message.answer("Tasdiqlang:", reply_markup=confirm)
-    await AddVideo.confirm.set()
+    await message.answer("Now, send me the caption")
+    await AddVideo.caption.set()
 
 
 @dp.message_handler(state=AddVideo.end, content_types=types.ContentTypes.ANY)
 async def add_text(message: types):
     await message.answer("Send me text, you freaking bastard!")
+
+
+@dp.message_handler(state=AddVideo.caption, content_types=types.ContentTypes.TEXT)
+async def add_text(message: types, state: FSMContext):
+    try:
+        caption = message.text
+        await state.update_data({"caption": caption})
+        data_info = await state.get_data()
+        file_id = data_info.get("file_id")
+        keyword = data_info.get("keyword")
+        await message.answer_document(document=file_id, thumb=file_id, caption=f"{caption} \n\nKalit so'z : <b>{keyword}</b>")
+        await message.answer("Tasdiqlang:", reply_markup=confirm)
+        await AddVideo.confirm.set()
+    except aiogram.utils.exceptions.BadRequest:
+        await message.answer("Caption or Keyword is too long!")
+
+
+@dp.message_handler(state=AddVideo.caption, content_types=types.ContentTypes.ANY)
+async def add_text(message: types):
+    await message.answer("Only text bro!")
 
 
 @dp.message_handler(state=AddVideo.confirm, text="Confirm! ✅")
@@ -62,11 +80,12 @@ async def add_text(message: types, state: FSMContext):
     try:
         await db.add_video(
             keyword=data.get("keyword"),
+            caption=data.get("caption"),
             file_id=data.get("file_id")
         )
+        await message.answer("Added successfully! 🙂")
     except Exception as e:
-        await message.reply_text(f"Couldn't add to database for {e} reason :(")
-    await message.answer("Added successfully! 🙂")
+        await message.answer(f"Couldn't add to database because:  <b>{e}</b> ")
     await state.finish()
 
 
@@ -121,11 +140,11 @@ async def delete(call: CallbackQuery):
             ]
         )
         try:
-            await call.message.answer_video(video=video[2], thumb=video[2], caption=f"Kalit so'z : {video[1]}",
+            await call.message.answer_video(video=video[3], thumb=video[3], caption=video[2],
                                             reply_markup=delete_keyboard)
             await DeleteStates.delete.set()
         except Exception as e:
-            await call.message.answer(f"Couldn't delete video bro. Here is the '{e}' mistake")
+            await call.message.answer(f"Couldn't delete video bro. Here is the '{e}' mistake. Probably coz of keyword unique contraint has been broken.")
 
     else:
         await call.answer("Iltimos, tugmalardan birini tanlang!")

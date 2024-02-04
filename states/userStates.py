@@ -3,16 +3,22 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 class UserState(StatesGroup):
     start = State()
-    results = State()
     fullname = State()
     date_of_birth = State()
     interORlocal = State()
     phone_number = State()
     phone_number_int = State()
+
+
+class F1UserState(StatesGroup):
     grade = State()
     degree = State()
     test_score = State()
     confirmation = State()
+
+
+class ResultState(StatesGroup):
+    results = State()
 
 
 class GradeStates(StatesGroup):
@@ -46,6 +52,7 @@ class B1UserState(StatesGroup):
 class AddVideo(StatesGroup):
     start = State()
     end = State()
+    caption = State()
     confirm = State()
 
 
