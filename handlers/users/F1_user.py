@@ -304,7 +304,7 @@ async def confirmation(message: types.Message, state: FSMContext):
             user = await db.select_user(telegram_id=user_data.get("telegram_id"))
 
         count = await db.count_users()
-        msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
+        msg = f"User '{user[1]}' has been added to F1 user's database! We now have {count} users."
         await bot.send_message(chat_id=ADMINS[0], text=msg)
 
         await message.answer("Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. Sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. We will reach out to you soon. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))

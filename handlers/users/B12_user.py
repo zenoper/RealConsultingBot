@@ -189,7 +189,7 @@ async def type_purpose(message: types, state: FSMContext):
         await message.answer(f"User '{user1[1]}' already exists in the database!")
 
     count = await db.count_b1users()
-    msg = f"User '{user[1]}' has been added to the database! We now have {count} users."
+    msg = f"User '{user[1]}' has been added to B1/B2 user's database! We now have {count} users."
     await bot.send_message(chat_id=ADMINS[0], text=msg)
 
     await message.answer(
