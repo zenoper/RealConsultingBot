@@ -193,3 +193,53 @@ class Database:
     async def drop_videos(self):
         await self.execute("DROP TABLE Videos", execute=True)
 
+
+
+# Canadian Visa
+
+
+    async def create_table_Cusers(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS CUsers (
+        id SERIAL PRIMARY KEY,
+        full_name VARCHAR(255) NOT NULL,
+        date_of_birth VARCHAR(255) NOT NULL,
+        phone_number VARCHAR NOT NULL,
+        countries VARCHAR(255) NOT NULL,
+        visit_date VARCHAR(255) NULL,
+        username varchar(255) NOT NULL,
+        telegram_id BIGINT NOT NULL
+        );
+        """
+        await self.execute(sql, execute=True)
+
+    @staticmethod
+    def format_args(sql, parameters: dict):
+        sql += " AND ".join([
+            f"{item} = ${num}" for num, item in enumerate(parameters.keys(),
+                                                          start=1)
+        ])
+        return sql, tuple(parameters.values())
+
+    async def add_Cuser(self, full_name, date_of_birth, phone_number, countries, visit_date, username, telegram_id):
+        sql = "INSERT INTO CUsers(full_name, date_of_birth, phone_number, countries, visit_date, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7) returning *"
+        return await self.execute(sql, full_name, date_of_birth, phone_number, countries, visit_date, username, telegram_id, fetchrow=True)
+
+    async def select_all_Cusers(self):
+        sql = "SELECT * FROM CUsers"
+        return await self.execute(sql, fetch=True)
+
+    async def select_Cuser(self, **kwargs):
+        sql = "SELECT * FROM CUsers WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetchrow=True)
+
+    async def count_Cusers(self):
+        sql = "SELECT COUNT(*) FROM CUsers"
+        return await self.execute(sql, fetchval=True)
+
+    async def delete_Cuser(self):
+        await self.execute("DELETE FROM CUsers WHERE TRUE", execute=True)
+
+    async def drop_Cusers(self):
+        await self.execute("DROP TABLE CUsers", execute=True)

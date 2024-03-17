@@ -49,6 +49,13 @@ class B1UserState(StatesGroup):
     confirmation = State()
 
 
+class CanadaUserState(StatesGroup):
+    abroad = State()
+    countries = State()
+    visit_date = State()
+    confirmation = State()
+
+
 class AddVideo(StatesGroup):
     start = State()
     end = State()

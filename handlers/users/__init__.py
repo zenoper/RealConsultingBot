@@ -3,6 +3,7 @@ from . import admin_add
 from . import form
 from . import results
 from . import help
+from . import canada_user
 from . import F1_user
 from . import B12_user
 from . import start_info

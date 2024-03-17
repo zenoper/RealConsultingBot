@@ -12,7 +12,6 @@ async def bot_start(message: types.Message):
     await UserState.start.set()
 
 
-
 @dp.message_handler(state=ResultState.results, text="Anketa to'ldirish")
 @dp.message_handler(state=UserState.start, text="Anketa to'ldirish")
 async def bot_start(message: types.Message):

@@ -2,9 +2,9 @@ import asyncpg.exceptions
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loader import dp, db, bot
-from states.userStates import B1UserState
+from states.userStates import B1UserState, UserState
 from keyboards.default import B12UserKeyboard
-from aiogram.types import ReplyKeyboardRemove
+from aiogram.types import ReplyKeyboardRemove, ContentTypes
 from data.config import ADMINS
 
 
@@ -196,4 +196,15 @@ async def type_purpose(message: types, state: FSMContext):
         "Hamkorligingiz uchun rahmat! \nTalablarimizga to’g’ri kelsangiz, sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nWe will reach out to you soon if you meet our requirements. 🙂",
         reply_markup=ReplyKeyboardRemove(selective=True))
     await state.finish()
+
+
+@dp.message_handler(state=B1UserState.confirmation, text="Tahrirlash/Edit ✏️")
+async def type_purpose(message: types):
+    await message.answer(f"Iltimos, to'liq ism va familiyangizni kiriting! \n\nPlease, fill in your full name!")
+    await UserState.fullname.set()
+
+
+@dp.message_handler(state=B1UserState.confirmation, content_types=ContentTypes.ANY)
+async def buttons(message: types.Message):
+    await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!", reply_markup=B12UserKeyboard.confirmation)
 

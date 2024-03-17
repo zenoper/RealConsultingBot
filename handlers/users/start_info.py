@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from loader import dp, db, bot
 from states.userStates import B1orF1States, B1UserState
 from keyboards.default import UserKeyboard, B12UserKeyboard
-from states.userStates import UserState, ResultState, F1UserState
+from states.userStates import UserState, ResultState, F1UserState, CanadaUserState
 
 
 @dp.message_handler(state=UserState.fullname)
@@ -113,17 +113,24 @@ async def dateofbirth(message: types.Message):
 
 
 
-@dp.message_handler(state=B1orF1States.start, text="F1 STUDENT VISA")
+@dp.message_handler(state=B1orF1States.start, text="🇺🇸 F1 STUDENT VISA")
 async def start(message: types.Message):
     await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
     await F1UserState.grade.set()
 
 
-@dp.message_handler(state=B1orF1States.start, text="B1/B2 BIZNES/TURIZM VISA")
+@dp.message_handler(state=B1orF1States.start, text="🇺🇸 B1/B2 SAYOHAT VISA")
 async def start(message: types.Message):
     await message.answer("Chet-elda oldin bo'lganmisiz? \n\nHave you been aboard?",
                          reply_markup=B12UserKeyboard.abroad)
     await B1UserState.abroad.set()
+
+
+@dp.message_handler(state=B1orF1States.start, text="🇨🇦 SAYOHAT VISA")
+async def start(message: types.Message):
+    await message.answer("Chet-elda oldin bo'lganmisiz? \n\nHave you been aboard?",
+                         reply_markup=B12UserKeyboard.abroad)
+    await CanadaUserState.abroad.set()
 
 
 @dp.message_handler(state=B1orF1States, content_types=types.ContentTypes.ANY)
