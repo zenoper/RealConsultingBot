@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from loader import dp, db, bot
 from states.userStates import B1orF1States, B1UserState
 from keyboards.default import UserKeyboard, B12UserKeyboard
-from states.userStates import UserState, ResultState, F1UserState, CanadaUserState
+from states.userStates import UserState, ResultState, F1UserState, CanadaUserState, EuropeUserState
 
 
 @dp.message_handler(state=UserState.fullname)
@@ -131,6 +131,13 @@ async def start(message: types.Message):
     await message.answer("Chet-elda oldin bo'lganmisiz? \n\nHave you been aboard?",
                          reply_markup=B12UserKeyboard.abroad)
     await CanadaUserState.abroad.set()
+
+
+@dp.message_handler(state=B1orF1States.start, text="🇪🇺 SAYOHAT VISA")
+async def start(message: types.Message):
+    await message.answer("Chet-elda oldin bo'lganmisiz? \n\nHave you been aboard?",
+                         reply_markup=B12UserKeyboard.abroad)
+    await EuropeUserState.abroad.set()
 
 
 @dp.message_handler(state=B1orF1States, content_types=types.ContentTypes.ANY)

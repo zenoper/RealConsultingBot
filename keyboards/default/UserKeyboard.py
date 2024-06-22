@@ -139,6 +139,9 @@ b1orf1 = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="🇨🇦 SAYOHAT VISA")
+        ],
+        [
+            KeyboardButton(text="🇪🇺 SAYOHAT VISA")
         ]
     ],
     resize_keyboard=True,

@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loader import dp, db, bot
 from states.userStates import B1UserState, UserState
-from keyboards.default import B12UserKeyboard
+from keyboards.default import B12UserKeyboard, UserKeyboard
 from aiogram.types import ReplyKeyboardRemove, ContentTypes
 from data.config import ADMINS
 
@@ -17,9 +17,9 @@ async def abroad(message: types):
 @dp.message_handler(state=B1UserState.abroad, text="No/Yo'q")
 async def abroad(message: types, state: FSMContext):
     await state.update_data({"countries": "No"})
-    await message.answer("Amerikada yashovchi qarindoshlaringiz bormi? \n\nDo you have relatives in the USA?",
+    await message.answer("Rasmiy ish joyingiz bormi? \n\nDo you officially work?",
                          reply_markup=B12UserKeyboard.relatives)
-    await B1UserState.relatives.set()
+    await B1UserState.work.set()
 
 
 @dp.message_handler(state=B1UserState.abroad, content_types=types.ContentTypes.ANY)
@@ -46,9 +46,9 @@ async def visit(message: types, state: FSMContext):
     visit_date = message.text
     if len(visit_date) >= 3:
         await state.update_data({"visit_date": visit_date})
-        await message.answer("Amerikada yashovchi qarindoshlaringiz bormi? \n\nDo you have relatives in the USA?",
+        await message.answer("Rasmiy ish joyingiz bormi? \n\nDo you officially work?",
                              reply_markup=B12UserKeyboard.relatives)
-        await B1UserState.relatives.set()
+        await B1UserState.work.set()
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
@@ -56,6 +56,180 @@ async def visit(message: types, state: FSMContext):
 @dp.message_handler(state=B1UserState.visit_date, content_types=types.ContentTypes.ANY)
 async def visit(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+
+# WORK
+@dp.message_handler(state=B1UserState.work, text="Yes/Ha")
+async def work(message: types, state: FSMContext):
+    await state.update_data({
+        "work": "Yes"
+    })
+    await message.answer("Rasmiy ish joyingizni nomini kiriting \n\nWhat is the name of the company you work at?")
+    await B1UserState.what_work.set()
+
+
+@dp.message_handler(state=B1UserState.work, text="No/Yo'q")
+async def student(message: types, state: FSMContext):
+    await state.update_data({
+        "work": "No"
+    })
+    await message.answer("Universitetda o'qiysizmi? \n\nDo you study at university?", reply_markup=B12UserKeyboard.relatives)
+    await B1UserState.student.set()
+
+
+@dp.message_handler(state=B1UserState.work, content_types=types.ContentTypes.ANY)
+async def abroad(message: types):
+    await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
+                         reply_markup=B12UserKeyboard.relatives)
+
+
+# WORKPLACE
+@dp.message_handler(state=B1UserState.what_work, content_types=types.ContentTypes.TEXT)
+async def what_work(message: types, state: FSMContext):
+    workplace = str(message.text)
+
+    if len(workplace) >= 3:
+        await state.update_data({
+            "workplace": workplace
+        })
+        await message.answer("Kim bo'lib ishlaysiz? \n\nWhat is your position at the company?")
+        await B1UserState.work_position.set()
+    else:
+        await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
+
+
+@dp.message_handler(state=B1UserState.what_work, content_types=types.ContentTypes.ANY)
+async def work(message: types, state: FSMContext):
+    await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+# WORK POSITION
+@dp.message_handler(state=B1UserState.work_position, content_types=types.ContentTypes.TEXT)
+async def position(message: types, state: FSMContext):
+    work_position = str(message.text)
+
+    if len(work_position) >= 3:
+        await state.update_data({
+            "position": work_position
+        })
+        await message.answer("Oyligingiz qancha? \n\nHow much is your salary?")
+        await B1UserState.work_salary.set()
+    else:
+        await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
+
+
+@dp.message_handler(state=B1UserState.work_position, content_types=types.ContentTypes.ANY)
+async def work(message: types, state: FSMContext):
+    await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+# WORK SALARY
+@dp.message_handler(state=B1UserState.work_salary, content_types=types.ContentTypes.TEXT)
+async def position(message: types, state: FSMContext):
+    work_salary = str(message.text)
+
+    if len(work_salary) >= 3:
+        await state.update_data({
+            "salary": work_salary
+        })
+        await message.answer("Universitetda o'qiysizmi? \n\nDo you study at university?",
+                             reply_markup=B12UserKeyboard.relatives)
+        await B1UserState.student.set()
+    else:
+        await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
+
+
+@dp.message_handler(state=B1UserState.work_salary, content_types=types.ContentTypes.ANY)
+async def work(message: types, state: FSMContext):
+    await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+# STUDENT
+@dp.message_handler(state=B1UserState.student, text="Yes/Ha")
+async def work(message: types, state: FSMContext):
+    await state.update_data({
+        "student": "Yes"
+    })
+    await message.answer("Qaysi universitetda o'qiysiz? \n\nWhat is the name of your university?")
+    await B1UserState.student_university.set()
+
+
+@dp.message_handler(state=B1UserState.student, text="No/Yo'q")
+async def student(message: types, state: FSMContext):
+    await state.update_data({
+        "student": "No"
+    })
+
+    await message.answer("Amerikada yashovchi qarindoshlaringiz bormi? \n\nDo you have relatives in the USA?",
+                         reply_markup=B12UserKeyboard.relatives)
+    await B1UserState.relatives.set()
+
+
+@dp.message_handler(state=B1UserState.student, content_types=types.ContentTypes.ANY)
+async def abroad(message: types):
+    await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
+                         reply_markup=B12UserKeyboard.relatives)
+
+
+# UNIVERSITY
+@dp.message_handler(state=B1UserState.student_university, content_types=types.ContentTypes.TEXT)
+async def what_work(message: types, state: FSMContext):
+    university = str(message.text)
+
+    if len(university) >= 3:
+        await state.update_data({
+            "university": university
+        })
+        await message.answer("Qaysi sohada o'qiysiz? \n\nWhat is your major at the university?")
+        await B1UserState.student_major.set()
+    else:
+        await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
+
+
+@dp.message_handler(state=B1UserState.student_university, content_types=types.ContentTypes.ANY)
+async def uni(message: types, state: FSMContext):
+    await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+# MAJOR
+@dp.message_handler(state=B1UserState.student_major, content_types=types.ContentTypes.TEXT)
+async def position(message: types, state: FSMContext):
+    major = str(message.text)
+
+    if len(major) >= 3:
+        await state.update_data({
+            "year": major
+        })
+        await message.answer("Nechinchi kurs talabasisiz? \n\nWhat year are you at university?", reply_markup=UserKeyboard.university)
+        await B1UserState.student_year.set()
+    else:
+        await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
+
+
+@dp.message_handler(state=B1UserState.student_major, content_types=types.ContentTypes.ANY)
+async def work(message: types, state: FSMContext):
+    await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
+
+
+# UNIVERSITY YEAR
+@dp.message_handler(text="1", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
+@dp.message_handler(text="2", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
+@dp.message_handler(text="3", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
+@dp.message_handler(text="4", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
+async def university(message: types.Message, state: FSMContext):
+    year = str(message.text)
+    await state.update_data({"grade": f"{year} kurs/year"})
+
+    await message.answer("Amerikada yashovchi qarindoshlaringiz bormi? \n\nDo you have relatives in the USA?",
+                         reply_markup=B12UserKeyboard.relatives)
+    await B1UserState.relatives.set()
+
+
+@dp.message_handler(state=B1UserState.student_year, content_types=types.ContentTypes.ANY)
+async def abroad(message: types):
+    await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
+                         reply_markup=UserKeyboard.university)
 
 
 #RELATIVES
@@ -138,12 +312,17 @@ async def type_how_long(message: types.Message, state: FSMContext):
         phone_number = data.get("phone_number")
         countries = data.get("countries")
         visit_date = data.get("visit_date")
+        workplace = data.get("workplace")
+        position = data.get("position")
+        salary = data.get("salary")
+        student = data.get("student")
+        university = data.get("university")
+        major = data.get("year")
+        year = data.get("grade")
         relatives = data.get("relatives")
         relative_visa = data.get("relative_visa")
         purpose = data.get("purpose")
         how_long = data.get("how_long")
-        username = data.get("username")
-        telegram_id = data.get("telegram_id")
 
         msg = "Iltimos, shaxsiy ma'lumotingiz to'g'riligini tasdiqlang! \nPlease, confirm your personal info is correct! \n \n"
         msg += f"To'liq ism/Full name - <b>{full_name}</b> \n\n"
@@ -152,6 +331,14 @@ async def type_how_long(message: types.Message, state: FSMContext):
         msg += f"Davlatlar/Countries - <b>{countries}</b> \n\n"
         if visit_date:
             msg += f"Tashrif sanasi/Visit Date - <b>{visit_date}</b> \n\n"
+        if workplace:
+            msg += f"Ish Joyi/Workplace - <b>{workplace}</b> \n\n"
+            msg += f"Kasb/Position - <b>{position}</b> \n\n"
+            msg += f"Oylik/Salary - <b>{salary}</b> \n\n"
+        msg += f"Talabamisiz/Student ? - <b>{student}</b> \n\n"
+        msg += f"Universitet/University - <b>{university}</b> \n\n"
+        msg += f"Soha/Major - <b>{major}</b> \n\n"
+        msg += f"Kurs/Year - <b>{year}</b> \n\n"
         msg += f"Qarindoshlar/Relatives - <b>{relatives}</b> \n\n"
         msg += f"Qarindoshlar visa turi/Relatives' visa type - <b>{relative_visa}</b> \n\n"
         msg += f"Sayohatdan Maqsad/Purpose of trip - <b>{purpose}</b> \n\n"
@@ -177,6 +364,14 @@ async def type_purpose(message: types, state: FSMContext):
             phone_number=user_data.get("phone_number"),
             countries=user_data.get("countries"),
             visit_date=user_data.get("visit_date"),
+            works=user_data.get("work"),
+            workplace=user_data.get("workplace"),
+            work_position=user_data.get("position"),
+            salary=user_data.get("salary"),
+            student=user_data.get("student"),
+            university=user_data.get("university"),
+            major=user_data.get("year"),
+            university_year=user_data.get("grade"),
             relatives=user_data.get("relatives"),
             relative_visa=user_data.get("relative_visa"),
             purpose=user_data.get("purpose"),

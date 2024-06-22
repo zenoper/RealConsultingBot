@@ -25,9 +25,9 @@ async def send_video_by_index(chat_id, index):
     if data:
         markup = types.InlineKeyboardMarkup(row_width=2)
         buttons = []
-        if index > 0:  # Add a "back" button if it's not the first video
+        if index > 0:
             buttons.append(types.InlineKeyboardButton("⬅️ Orqaga", callback_data=f"video_{index - 1}"))
-        if index < len(data) - 1:  # Add a "next" button if it's not the last video
+        if index < len(data) - 1:
             buttons.append(types.InlineKeyboardButton("Oldinga ➡️", callback_data=f"video_{index + 1}"))
 
         markup.add(*buttons)

@@ -105,6 +105,14 @@ class Database:
         phone_number VARCHAR NOT NULL,
         countries VARCHAR(255) NOT NULL,
         visit_date VARCHAR(255) NULL,
+        works VARCHAR(255) NOT NULL,
+        workplace VARCHAR(255) NULL,
+        work_position VARCHAR(255) NULL,
+        salary VARCHAR(255) NULL,
+        student VARCHAR(255) NOT NULL,
+        university VARCHAR(255) NULL,
+        major varchar(255) NULL,
+        university_year varchar(255) NULL,
         relatives VARCHAR(255) NOT NULL,
         relative_visa VARCHAR(255) NULL,
         purpose VARCHAR(255) NOT NULL,
@@ -123,9 +131,9 @@ class Database:
         ])
         return sql, tuple(parameters.values())
 
-    async def add_b1user(self, full_name, date_of_birth, phone_number, countries, visit_date, relatives, relative_visa, purpose, how_long, username, telegram_id):
-        sql = "INSERT INTO B1Users(full_name, date_of_birth, phone_number, countries, visit_date, relatives, relative_visa, purpose, how_long, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning *"
-        return await self.execute(sql, full_name, date_of_birth, phone_number, countries, visit_date, relatives, relative_visa, purpose, how_long, username, telegram_id, fetchrow=True)
+    async def add_b1user(self, full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, relatives, relative_visa, purpose, how_long, username, telegram_id):
+        sql = "INSERT INTO B1Users(full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, relatives, relative_visa, purpose, how_long, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) returning *"
+        return await self.execute(sql, full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, relatives, relative_visa, purpose, how_long, username, telegram_id, fetchrow=True)
 
     async def select_all_b1users(self):
         sql = "SELECT * FROM B1Users"
@@ -207,6 +215,14 @@ class Database:
         phone_number VARCHAR NOT NULL,
         countries VARCHAR(255) NOT NULL,
         visit_date VARCHAR(255) NULL,
+        works VARCHAR(255) NOT NULL,
+        workplace VARCHAR(255) NULL,
+        work_position VARCHAR(255) NULL,
+        salary VARCHAR(255) NULL,
+        student VARCHAR(255) NOT NULL,
+        university VARCHAR(255) NULL,
+        major varchar(255) NULL,
+        university_year varchar(255) NULL,
         username varchar(255) NOT NULL,
         telegram_id BIGINT NOT NULL
         );
@@ -221,9 +237,9 @@ class Database:
         ])
         return sql, tuple(parameters.values())
 
-    async def add_Cuser(self, full_name, date_of_birth, phone_number, countries, visit_date, username, telegram_id):
-        sql = "INSERT INTO CUsers(full_name, date_of_birth, phone_number, countries, visit_date, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7) returning *"
-        return await self.execute(sql, full_name, date_of_birth, phone_number, countries, visit_date, username, telegram_id, fetchrow=True)
+    async def add_Cuser(self, full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, username, telegram_id):
+        sql = "INSERT INTO CUsers(full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) returning *"
+        return await self.execute(sql, full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, username, telegram_id, fetchrow=True)
 
     async def select_all_Cusers(self):
         sql = "SELECT * FROM CUsers"
@@ -243,3 +259,60 @@ class Database:
 
     async def drop_Cusers(self):
         await self.execute("DROP TABLE CUsers", execute=True)
+
+
+# European VISA
+
+    async def create_table_Eusers(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS EUsers (
+        id SERIAL PRIMARY KEY,
+        full_name VARCHAR(255) NOT NULL,
+        date_of_birth VARCHAR(255) NOT NULL,
+        phone_number VARCHAR NOT NULL,
+        countries VARCHAR(255) NOT NULL,
+        visit_date VARCHAR(255) NULL,
+        works VARCHAR(255) NOT NULL,
+        workplace VARCHAR(255) NULL,
+        work_position VARCHAR(255) NULL,
+        salary VARCHAR(255) NULL,
+        student VARCHAR(255) NOT NULL,
+        university VARCHAR(255) NULL,
+        major varchar(255) NULL,
+        university_year varchar(255) NULL,
+        username varchar(255) NOT NULL,
+        telegram_id BIGINT NOT NULL
+        );
+        """
+        await self.execute(sql, execute=True)
+
+    @staticmethod
+    def format_args(sql, parameters: dict):
+        sql += " AND ".join([
+            f"{item} = ${num}" for num, item in enumerate(parameters.keys(),
+                                                          start=1)
+        ])
+        return sql, tuple(parameters.values())
+
+    async def add_Euser(self, full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, username, telegram_id):
+        sql = "INSERT INTO EUsers(full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) returning *"
+        return await self.execute(sql, full_name, date_of_birth, phone_number, countries, visit_date, works, workplace, work_position, salary, student, university, major, university_year, username, telegram_id, fetchrow=True)
+
+    async def select_all_Eusers(self):
+        sql = "SELECT * FROM EUsers"
+        return await self.execute(sql, fetch=True)
+
+    async def select_Euser(self, **kwargs):
+        sql = "SELECT * FROM EUsers WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetchrow=True)
+
+    async def count_Eusers(self):
+        sql = "SELECT COUNT(*) FROM EUsers"
+        return await self.execute(sql, fetchval=True)
+
+    async def delete_Euser(self):
+        await self.execute("DELETE FROM EUsers WHERE TRUE", execute=True)
+
+    async def drop_Eusers(self):
+        await self.execute("DROP TABLE EUsers", execute=True)
