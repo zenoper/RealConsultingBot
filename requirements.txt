@@ -1,3 +1,2 @@
-aiogram~=2.14
-environs~=8.0.0
-python==3.10.2
+aiogram==2.14
+environs==8.0.0
