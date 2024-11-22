@@ -4,12 +4,18 @@ from aiogram import types
 from loader import dp, db, bot
 from states.userStates import UserState, ResultState
 from keyboards.default import UserKeyboard
+from data.config import ADMINS
 
 
 @dp.message_handler(CommandStart(), state="*")
 async def bot_start(message: types.Message):
-    await message.answer(f"Assalamu alaykum, <b>{message.from_user.full_name}</b>! 🙂\n\nTanlang: \n\nChoose:", reply_markup=UserKeyboard.start)
-    await UserState.start.set()
+    if str(message.from_user.id) in ADMINS:
+        await message.answer(f"Assalamu alaykum, boshliq! 🙂\n\nYour commands: \n/download_data -> export all F1 data",
+                             reply_markup=UserKeyboard.start)
+        await UserState.start.set()
+    else:
+        await message.answer(f"Assalamu alaykum, <b>{message.from_user.full_name}</b>! 🙂\n\nTanlang: \n\nChoose:", reply_markup=UserKeyboard.start)
+        await UserState.start.set()
 
 
 @dp.message_handler(state=ResultState.results, text="Anketa to'ldirish")

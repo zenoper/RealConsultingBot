@@ -66,10 +66,23 @@ class Database:
         sql = "INSERT INTO Users(full_name, date_of_birth, phone_number, grade, education_degree, test_score, username, telegram_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8) returning *"
         return await self.execute(sql, full_name, date_of_birth, phone_number, grade, education_degree, test_score, username, telegram_id, fetchrow=True)
 
-
     async def select_all_users(self):
         sql = "SELECT * FROM Users"
-        return await self.execute(sql, fetch=True)
+        data = await self.execute(sql, fetch=True)
+
+        columns = [
+            'id',
+            'full_name',
+            'date_of_birth',
+            'phone_number',
+            'grade',
+            'education_degree',
+            'test_score',
+            'username',
+            'telegram_id'
+        ]
+
+        return columns, data
 
 
     async def select_user(self, **kwargs):

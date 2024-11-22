@@ -1,14 +1,19 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-import asyncpg
 import aiogram
 from aiogram.dispatcher.filters.builtin import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, InputFile
 
-from loader import dp, db
+from loader import dp, db, bot
 from data.config import ADMINS
 from states.userStates import AddVideo, DeleteStates, UserState
 from keyboards.default.B12UserKeyboard import confirm
+
+
+from io import BytesIO
+import pandas as pd
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment, Font
 
 
 @dp.message_handler(Command(["add_video"]), state="*")
@@ -159,3 +164,67 @@ async def delete(call: CallbackQuery):
     except Exception as e:
         await call.message.answer("O'chirish amalga oshmadi. Uzr :( \n\nQaytadan harakat qilib ko'ring : /delete")
         print(e)
+
+
+@dp.message_handler(Command(["download_data"]), state="*")
+async def add_video(message: types):
+    if str(message.from_user.id) == ADMINS[0]:
+        result = await db.select_all_users()
+        if result:
+            columns, data = result  # Unpack the returned tuple
+
+            # Convert the data to DataFrame with column names
+            excel_file = pd.DataFrame(data, columns=columns)
+
+            # Create a BytesIO object
+            excel_buffer = BytesIO()
+
+            # Write to Excel with styling
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                excel_file.to_excel(writer, sheet_name='Users', index=False)
+
+                # Access the worksheet to apply styling
+                worksheet = writer.sheets['Users']
+
+                # Center alignment style
+                center_aligned = Alignment(horizontal='center', vertical='center')
+
+                # Style for headers (centered and bold)
+                header_font = Font(bold=True, size=12)
+
+                # Apply styling to all cells including headers
+                for row in worksheet.iter_rows():
+                    for cell in row:
+                        cell.alignment = center_aligned
+
+                # Apply additional header styling
+                for cell in worksheet[1]:
+                    cell.font = header_font
+
+                # Adjust column widths based on content
+                for idx, col in enumerate(excel_file.columns):
+                    max_length = max(
+                        excel_file[col].astype(str).apply(len).max(),
+                        len(str(col))
+                    )
+                    adjusted_width = max_length + 3
+                    worksheet.column_dimensions[get_column_letter(idx + 1)].width = adjusted_width
+
+                # Freeze the header row
+                worksheet.freeze_panes = 'A2'
+
+            # Reset buffer position to start
+            excel_buffer.seek(0)
+
+            # Create InputFile from buffer
+            document = InputFile(excel_buffer, filename="UserInfo.xlsx")
+
+            # Send the document
+            await message.answer_document(
+                document,
+                caption="Here's your All User Info."
+            )
+        else:
+            await message.answer("No user data found.")
+    else:
+        await message.answer("You don't qualify bro :(")
