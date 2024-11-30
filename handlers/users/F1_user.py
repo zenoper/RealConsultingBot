@@ -307,7 +307,7 @@ async def confirmation(message: types.Message, state: FSMContext):
         msg = f"User '{user[1]}' has been added to F1 user's database! We now have {count} users."
         await bot.send_message(chat_id=ADMINS[0], text=msg)
 
-        await message.answer("Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. Sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. We will reach out to you soon. 🙂", reply_markup=ReplyKeyboardRemove(selective=True))
+        await message.answer("Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. IELTS yoki Duolingo sertifikatingizni @diyorbek1m telegramga jo’nating. Sertifikatingiz haqiqatda borligini ko’rib, tekshirib, yana bir bor ishonch hosil qilib agar hammasi joyida bo’lsa shunda sizga service bo’yicha batafsil ma’lumot beramiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. Please send your IELTS or Duolingo certificate to @diyorbek1m. We will double check if you, in fact, have a valid certificate and whether it meets the requirements. If everything is alright, then we will give you detailed information about our services.", reply_markup=ReplyKeyboardRemove(selective=True))
         await state.finish()
     else:
         user_data = await state.get_data()
