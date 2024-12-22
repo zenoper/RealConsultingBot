@@ -307,7 +307,19 @@ async def confirmation(message: types.Message, state: FSMContext):
         msg = f"User '{user[1]}' has been added to F1 user's database! We now have {count} users."
         await bot.send_message(chat_id=ADMINS[0], text=msg)
 
-        await message.answer("Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. IELTS yoki Duolingo sertifikatingizni @diyorbek1m telegramga jo’nating. Sertifikatingiz haqiqatda borligini ko’rib, tekshirib, yana bir bor ishonch hosil qilib agar hammasi joyida bo’lsa shunda sizga service bo’yicha batafsil ma’lumot beramiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. Please send your IELTS or Duolingo certificate to @diyorbek1m. We will double check if you, in fact, have a valid certificate and whether it meets the requirements. If everything is alright, then we will give you detailed information about our services.", reply_markup=ReplyKeyboardRemove(selective=True))
+        await message.answer(
+            "🙁<b>Afsuski, hozirda bizda qabul yopiq</b> va <i>yangi studentlarni olmayabmiz</i>. "
+            "Yuqori xizmat sifatini saqlash maqsadida biz juda ham kam studentlar bilan ishlaymiz va shunga majbur bo'ldik.\n\n"
+            "😊Lekin, <b>siz aslo tushkunlikka tushmang</b> sababi <i>yanvar oyining 5-15-sanalari oralig'ida</i> "
+            "kuzgi semester uchun eng oxirgi qabulimiz ochiladi va sizda hali ham <b>RealConsulting bilan</b> birgalikda "
+            "Amerikaning top universitetlariga 100%gacha grant asosida o'qishga kirish hamda <i>F1 Student Visa bilan Amerikaga ketish</i> "
+            "imkoniyati mavjud. <b><a href='https://t.me/realconsultingusa'>Telegram</a></b> va <b><a href='https://www.instagram.com/realconsultingusa?igsh=MWZxd20ydnp1cmFkeQ=='>Instagram</a></b> orqali RealConsultingni kuzatib borishda davom eting "
+            "va qabul ochilishi bilan darhol Telegramda <b>@RealConsultingbot</b> orqali qayta anketa to'ldiring. "
+            "Agar, talablarimizga to'g'ri kelsangiz sizga DiyorbekReal shaxsiy telegrami berilinadi va ularga sertifikatingizni "
+            "jo'natasiz. Yana bir bor tekshiruvdan ham muvaqqiyatli o'tsangiz sizga servisimiz bo'yicha batafsil info beramiz "
+            "va Amerikaga ketishizda to'liq yordam beramiz. Charchamang😊",
+            reply_markup=ReplyKeyboardRemove(selective=True)
+        )
         await state.finish()
     else:
         user_data = await state.get_data()
