@@ -310,7 +310,7 @@ async def confirmation(message: types.Message, state: FSMContext):
 
         await message.answer(
             "🙁<b>Afsuski, hozirda bizda qabul yopiq</b> va <i>yangi studentlarni olmayabmiz</i>. "
-            "Yuqori darajadagi xizmat sifatini saqlash maqsadida biz juda ham kam studentlar bilan ishlaymiz va shunga majbur bo'ldik.\n\n"
+            "Yuqori darajadagi xizmat sifatini saqlash maqsadida biz juda ham kam studentlar bilan ishlaymiz va qabulni hozircha to’xtatib turishga majbur bo’ldik. \n\n"
             "😊Lekin, <b>siz aslo tushkunlikka tushmang</b> sababi <i>fevral oyining boshida</i> "
             "kuzgi semester uchun eng oxirgi qabulimiz ochiladi va sizda hali ham <b>RealConsulting bilan</b> birgalikda "
             "Amerikaning top universitetlariga 100%gacha grant asosida o'qishga kirish hamda <i>F1 Student Visa bilan Amerikaga ketish</i> "
