@@ -307,9 +307,23 @@ async def confirmation(message: types.Message, state: FSMContext):
         msg = f"User '{user[1]}' has been added to F1 user's database! We now have {count} users."
         await bot.send_message(chat_id=ADMINS[0], text=msg)
 
+
         await message.answer(
-            "Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. IELTS yoki Duolingo sertifikatingizni <b>@RealConsultingHelp</b> telegramga jo’nating. Sertifikatingiz haqiqatda borligini ko’rib, tekshirib, yana bir bor ishonch hosil qilib agar hammasi joyida bo’lsa shunda sizga service bo’yicha batafsil ma’lumot beramiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. Please send your IELTS or Duolingo certificate to <b>@RealConsultingHelp</b>. We will double check if you, in fact, have a valid certificate and whether it meets the requirements. If everything is alright, then we will give you detailed information about our services.",
+            "🙁<b>Afsuski, hozirda bizda qabul yopiq</b> va <i>yangi studentlarni olmayabmiz</i>. "
+            "Yuqori darajadagi xizmat sifatini saqlash maqsadida biz juda ham kam studentlar bilan ishlaymiz va shunga majbur bo'ldik.\n\n"
+            "😊Lekin, <b>siz aslo tushkunlikka tushmang</b> sababi <i>fevral oyining boshida</i> "
+            "kuzgi semester uchun eng oxirgi qabulimiz ochiladi va sizda hali ham <b>RealConsulting bilan</b> birgalikda "
+            "Amerikaning top universitetlariga 100%gacha grant asosida o'qishga kirish hamda <i>F1 Student Visa bilan Amerikaga ketish</i> "
+            "imkoniyati mavjud. <b><a href='https://t.me/realconsultingusa'>Telegram</a></b> va <b><a href='https://www.instagram.com/realconsultingusa?igsh=MWZxd20ydnp1cmFkeQ=='>Instagram</a></b> orqali RealConsultingni kuzatib borishda davom eting "
+            "va qabul ochilishi bilan darhol Telegramda <b>@RealConsultingbot</b> orqali qayta anketa to'ldiring. \n\n"
+            "🖇️Agar, qabul ochilganda telegram botda kiritgan ma’lumotlaringiz bo’yicha dastlabki screeningdan qoniqarli o’tsangiz, sizga 2-bosqich anketasiga link jo’natilinadi. "
+            "Yana bir bor tekshiruvdan ham muvaqqiyatli o’ta olgan taqdirizdagina sizga servisimiz bo’yicha batafsil ma’lumot beramiz va Amerikaga 100%gacha grant asosida ketishizda to’liq yordam beramiz. "
+            "Amerikada ko’rishguncha, charchamang🙂‍↔️",
             reply_markup=ReplyKeyboardRemove(selective=True))
+        # await message.answer(
+        #     "Hamkorligingiz uchun rahmat! \nBizni talablarimizga to'g'ri keldingiz ✅. IELTS yoki Duolingo sertifikatingizni <b>@RealConsultingHelp</b> telegramga jo’nating. Sertifikatingiz haqiqatda borligini ko’rib, tekshirib, yana bir bor ishonch hosil qilib agar hammasi joyida bo’lsa shunda sizga service bo’yicha batafsil ma’lumot beramiz. \n\nThank you for cooperation! \nYou meet our requirements ✅. Please send your IELTS or Duolingo certificate to <b>@RealConsultingHelp</b>. We will double check if you, in fact, have a valid certificate and whether it meets the requirements. If everything is alright, then we will give you detailed information about our services.",
+        #     reply_markup=ReplyKeyboardRemove(selective=True))
+
         await state.finish()
     else:
         user_data = await state.get_data()
