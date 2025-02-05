@@ -77,8 +77,8 @@ async def phone_number(message: types.Message, state: FSMContext):
     user_name = message.from_user.username
     telegram_id = message.from_user.id
     await state.update_data({'phone_number': contact, "username": user_name, "telegram_id": telegram_id})
-    await message.answer("Qaysi turdagi visani olmoqchisiz?", reply_markup=UserKeyboard.b1orf1)
-    await B1orF1States.start.set()
+    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
+    await F1UserState.grade.set()
 
 
 @dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number_int)
@@ -86,8 +86,8 @@ async def phone(message: types.Message, state: FSMContext):
     phonenumber = message.text
     telegram_id = message.from_user.id
     await state.update_data({'phone_number': phonenumber, "telegram_id": telegram_id})
-    await message.answer("Qaysi turdagi visani olmoqchisiz?", reply_markup=UserKeyboard.b1orf1)
-    await B1orF1States.start.set()
+    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
+    await F1UserState.grade.set()
 
 @dp.message_handler(content_types=types.ContentTypes.ANY, state=UserState.phone_number_int)
 async def dateofbirth(message: types.Message):
@@ -100,8 +100,8 @@ async def phone(message: types.Message, state: FSMContext):
     phonenumber = message.text
     telegram_id = message.from_user.id
     await state.update_data({'phone_number': phonenumber, "telegram_id": telegram_id})
-    await message.answer("Qaysi turdagi visani olmoqchisiz?", reply_markup=UserKeyboard.b1orf1)
-    await B1orF1States.start.set()
+    await message.answer("Tanlang: \n\nChoose one:", reply_markup=UserKeyboard.grade)
+    await F1UserState.grade.set()
 
 @dp.message_handler(content_types=types.ContentTypes.TEXT, state=UserState.phone_number)
 async def phone(message: types.Message):
