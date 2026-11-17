@@ -1,91 +1,93 @@
 import asyncpg.exceptions
-from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram import F, types
+from aiogram.filters import StateFilter
+from aiogram.enums import ContentType
+from aiogram.fsm.context import FSMContext
 from loader import dp, db, bot
 from states.userStates import B1UserState, UserState
 from keyboards.default import B12UserKeyboard, UserKeyboard
-from aiogram.types import ReplyKeyboardRemove, ContentTypes
+from aiogram.types import ReplyKeyboardRemove
 from data.config import ADMINS
 
 
-@dp.message_handler(state=B1UserState.abroad, text="Yes/Ha")
-async def abroad(message: types):
+@dp.message(StateFilter(B1UserState.abroad), F.text == 'Yes/Ha')
+async def abroad(message: types, state: FSMContext):
     await message.answer("Iltimos, siz bo'lgan davlatlar nomini yozib qoldiring")
-    await B1UserState.countries.set()
+    await state.set_state(B1UserState.countries)
 
 
-@dp.message_handler(state=B1UserState.abroad, text="No/Yo'q")
+@dp.message(StateFilter(B1UserState.abroad), F.text == "No/Yo'q")
 async def abroad(message: types, state: FSMContext):
     await state.update_data({"countries": "No"})
     await message.answer("Rasmiy ish joyingiz bormi? \n\nDo you officially work?",
                          reply_markup=B12UserKeyboard.relatives)
-    await B1UserState.work.set()
+    await state.set_state(B1UserState.work)
 
 
-@dp.message_handler(state=B1UserState.abroad, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.abroad))
 async def abroad(message: types):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
                          reply_markup=B12UserKeyboard.abroad)
 
 
-@dp.message_handler(state=B1UserState.countries, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.countries), F.content_type == ContentType.TEXT)
 async def country(message: types, state: FSMContext):
     countries = message.text
     await state.update_data({"countries": countries})
     await message.answer("U davlat(lar)da qachon bo'lgansiz? \nMasalan: Mart, 2021 \n\nWhen have you been there? \nFor example, March, 2021")
-    await B1UserState.visit_date.set()
+    await state.set_state(B1UserState.visit_date)
 
 
-@dp.message_handler(state=B1UserState.countries, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.countries))
 async def country(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
-@dp.message_handler(state=B1UserState.visit_date, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.visit_date), F.content_type == ContentType.TEXT)
 async def visit(message: types, state: FSMContext):
     visit_date = message.text
     if len(visit_date) >= 3:
         await state.update_data({"visit_date": visit_date})
         await message.answer("Rasmiy ish joyingiz bormi? \n\nDo you officially work?",
                              reply_markup=B12UserKeyboard.relatives)
-        await B1UserState.work.set()
+        await state.set_state(B1UserState.work)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.visit_date, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.visit_date))
 async def visit(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 
 # WORK
-@dp.message_handler(state=B1UserState.work, text="Yes/Ha")
+@dp.message(StateFilter(B1UserState.work), F.text == 'Yes/Ha')
 async def work(message: types, state: FSMContext):
     await state.update_data({
         "work": "Yes"
     })
     await message.answer("Rasmiy ish joyingizni nomini kiriting \n\nWhat is the name of the company you work at?")
-    await B1UserState.what_work.set()
+    await state.set_state(B1UserState.what_work)
 
 
-@dp.message_handler(state=B1UserState.work, text="No/Yo'q")
+@dp.message(StateFilter(B1UserState.work), F.text == "No/Yo'q")
 async def student(message: types, state: FSMContext):
     await state.update_data({
         "work": "No"
     })
     await message.answer("Universitetda o'qiysizmi? \n\nDo you study at university?", reply_markup=B12UserKeyboard.relatives)
-    await B1UserState.student.set()
+    await state.set_state(B1UserState.student)
 
 
-@dp.message_handler(state=B1UserState.work, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.work))
 async def abroad(message: types):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
                          reply_markup=B12UserKeyboard.relatives)
 
 
 # WORKPLACE
-@dp.message_handler(state=B1UserState.what_work, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.what_work), F.content_type == ContentType.TEXT)
 async def what_work(message: types, state: FSMContext):
     workplace = str(message.text)
 
@@ -94,18 +96,18 @@ async def what_work(message: types, state: FSMContext):
             "workplace": workplace
         })
         await message.answer("Kim bo'lib ishlaysiz? \n\nWhat is your position at the company?")
-        await B1UserState.work_position.set()
+        await state.set_state(B1UserState.work_position)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.what_work, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.what_work))
 async def work(message: types, state: FSMContext):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 # WORK POSITION
-@dp.message_handler(state=B1UserState.work_position, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.work_position), F.content_type == ContentType.TEXT)
 async def position(message: types, state: FSMContext):
     work_position = str(message.text)
 
@@ -114,18 +116,18 @@ async def position(message: types, state: FSMContext):
             "position": work_position
         })
         await message.answer("Oyligingiz qancha? \n\nHow much is your salary?")
-        await B1UserState.work_salary.set()
+        await state.set_state(B1UserState.work_salary)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.work_position, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.work_position))
 async def work(message: types, state: FSMContext):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 # WORK SALARY
-@dp.message_handler(state=B1UserState.work_salary, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.work_salary), F.content_type == ContentType.TEXT)
 async def position(message: types, state: FSMContext):
     work_salary = str(message.text)
 
@@ -135,27 +137,27 @@ async def position(message: types, state: FSMContext):
         })
         await message.answer("Universitetda o'qiysizmi? \n\nDo you study at university?",
                              reply_markup=B12UserKeyboard.relatives)
-        await B1UserState.student.set()
+        await state.set_state(B1UserState.student)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.work_salary, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.work_salary))
 async def work(message: types, state: FSMContext):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 # STUDENT
-@dp.message_handler(state=B1UserState.student, text="Yes/Ha")
+@dp.message(StateFilter(B1UserState.student), F.text == 'Yes/Ha')
 async def work(message: types, state: FSMContext):
     await state.update_data({
         "student": "Yes"
     })
     await message.answer("Qaysi universitetda o'qiysiz? \n\nWhat is the name of your university?")
-    await B1UserState.student_university.set()
+    await state.set_state(B1UserState.student_university)
 
 
-@dp.message_handler(state=B1UserState.student, text="No/Yo'q")
+@dp.message(StateFilter(B1UserState.student), F.text == "No/Yo'q")
 async def student(message: types, state: FSMContext):
     await state.update_data({
         "student": "No"
@@ -163,17 +165,17 @@ async def student(message: types, state: FSMContext):
 
     await message.answer("Amerikada yashovchi qarindoshlaringiz bormi? \n\nDo you have relatives in the USA?",
                          reply_markup=B12UserKeyboard.relatives)
-    await B1UserState.relatives.set()
+    await state.set_state(B1UserState.relatives)
 
 
-@dp.message_handler(state=B1UserState.student, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.student))
 async def abroad(message: types):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
                          reply_markup=B12UserKeyboard.relatives)
 
 
 # UNIVERSITY
-@dp.message_handler(state=B1UserState.student_university, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.student_university), F.content_type == ContentType.TEXT)
 async def what_work(message: types, state: FSMContext):
     university = str(message.text)
 
@@ -182,18 +184,18 @@ async def what_work(message: types, state: FSMContext):
             "university": university
         })
         await message.answer("Qaysi sohada o'qiysiz? \n\nWhat is your major at the university?")
-        await B1UserState.student_major.set()
+        await state.set_state(B1UserState.student_major)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.student_university, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.student_university))
 async def uni(message: types, state: FSMContext):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 # MAJOR
-@dp.message_handler(state=B1UserState.student_major, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.student_major), F.content_type == ContentType.TEXT)
 async def position(message: types, state: FSMContext):
     major = str(message.text)
 
@@ -202,31 +204,31 @@ async def position(message: types, state: FSMContext):
             "year": major
         })
         await message.answer("Nechinchi kurs talabasisiz? \n\nWhat year are you at university?", reply_markup=UserKeyboard.university)
-        await B1UserState.student_year.set()
+        await state.set_state(B1UserState.student_year)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.student_major, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.student_major))
 async def work(message: types, state: FSMContext):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 # UNIVERSITY YEAR
-@dp.message_handler(text="1", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
-@dp.message_handler(text="2", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
-@dp.message_handler(text="3", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
-@dp.message_handler(text="4", content_types=types.ContentTypes.TEXT, state=B1UserState.student_year)
+@dp.message(StateFilter(B1UserState.student_year), F.text == '1')
+@dp.message(StateFilter(B1UserState.student_year), F.text == '2')
+@dp.message(StateFilter(B1UserState.student_year), F.text == '3')
+@dp.message(StateFilter(B1UserState.student_year), F.text == '4')
 async def university(message: types.Message, state: FSMContext):
     year = str(message.text)
     await state.update_data({"grade": f"{year} kurs/year"})
 
     await message.answer("Amerikada yashovchi qarindoshlaringiz bormi? \n\nDo you have relatives in the USA?",
                          reply_markup=B12UserKeyboard.relatives)
-    await B1UserState.relatives.set()
+    await state.set_state(B1UserState.relatives)
 
 
-@dp.message_handler(state=B1UserState.student_year, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.student_year))
 async def abroad(message: types):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons",
                          reply_markup=UserKeyboard.university)
@@ -234,74 +236,74 @@ async def abroad(message: types):
 
 #RELATIVES
 
-@dp.message_handler(state=B1UserState.relatives, text="Yes/Ha")
+@dp.message(StateFilter(B1UserState.relatives), F.text == 'Yes/Ha')
 async def relative(message: types.Message, state: FSMContext):
     await state.update_data({"relatives": "Yes"})
     await message.answer("Qarindoshlaringiz Amerikaga qaysi visa turi orqali borishgan? \n\nWith which visa type did your relatives go to the USA?")
-    await B1UserState.relative_visa.set()
+    await state.set_state(B1UserState.relative_visa)
 
 
-@dp.message_handler(state=B1UserState.relatives, text="No/Yo'q")
+@dp.message(StateFilter(B1UserState.relatives), F.text == "No/Yo'q")
 async def relative(message: types.Message, state: FSMContext):
     await state.update_data({"relatives": "No"})
     await message.answer("Amerikaga borishdan maqsadingiz nima? \n\nWhat’s your purpose of visiting the USA?")
-    await B1UserState.purpose.set()
+    await state.set_state(B1UserState.purpose)
 
 
-@dp.message_handler(state=B1UserState.relatives, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.relatives))
 async def relative(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!",
                          reply_markup=B12UserKeyboard.relatives)
 
 
-@dp.message_handler(state=B1UserState.relative_visa, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.relative_visa), F.content_type == ContentType.TEXT)
 async def type_visa(message: types.Message, state: FSMContext):
     relative_visa = message.text
     await state.update_data({"relative_visa": relative_visa})
     await message.answer("Amerikaga borishdan maqsadingiz nima? \n\nWhat’s your purpose of visiting the USA?")
-    await B1UserState.purpose.set()
+    await state.set_state(B1UserState.purpose)
 
 
-@dp.message_handler(state=B1UserState.relative_visa, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.relative_visa))
 async def type_visa(message: types.Message):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
 #PURPOSE
 
-@dp.message_handler(state=B1UserState.purpose, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.purpose), F.content_type == ContentType.TEXT)
 async def type_purpose(message: types, state: FSMContext):
     purpose = message.text
     if len(purpose) >= 3:
         await state.update_data({"purpose": purpose})
         await message.answer("Amerikada qancha vaqt bo'lmoqchisiz? \n\nHow long do you want to be in the USA?")
-        await B1UserState.how_long.set()
+        await state.set_state(B1UserState.how_long)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.purpose, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.purpose))
 async def type_purpose(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
-@dp.message_handler(state=B1UserState.how_long, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.how_long), F.content_type == ContentType.TEXT)
 async def type_how_long(message: types.Message, state: FSMContext):
     how_long = message.text
     if len(how_long) >= 3:
         await state.update_data({"how_long": how_long})
         await message.answer("Amerikada qaysi joylariga bormoqchisiz? \n\nWhich places do you want to visit in America?")
-        await B1UserState.places_to_visit.set()
+        await state.set_state(B1UserState.places_to_visit)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.how_long, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.how_long))
 async def type_purpose(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
-@dp.message_handler(state=B1UserState.places_to_visit, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(B1UserState.places_to_visit), F.content_type == ContentType.TEXT)
 async def type_how_long(message: types.Message, state: FSMContext):
     places_to_visit = message.text
     if len(places_to_visit) >= 3:
@@ -344,17 +346,17 @@ async def type_how_long(message: types.Message, state: FSMContext):
         msg += f"Sayohatdan Maqsad/Purpose of trip - <b>{purpose}</b> \n\n"
         msg += f"Sayohat davomiyligi/Trip Duration - <b>{how_long}</b> \n\n"
         await message.answer(msg, reply_markup=B12UserKeyboard.confirmation)
-        await B1UserState.confirmation.set()
+        await state.set_state(B1UserState.confirmation)
     else:
         await message.answer("Iltimos, to'liq ma'lumot bering! \n\nPlease, provide complete information!")
 
 
-@dp.message_handler(state=B1UserState.places_to_visit, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.places_to_visit))
 async def type_purpose(message: types):
     await message.answer("Iltimos, faqatgina text yozing! \n\nPlease, only write text!")
 
 
-@dp.message_handler(state=B1UserState.confirmation, text="Tasdiqlash/Confirm! ✅")
+@dp.message(StateFilter(B1UserState.confirmation), F.text == 'Tasdiqlash/Confirm! ✅')
 async def type_purpose(message: types, state: FSMContext):
     user_data = await state.get_data()
     try:
@@ -390,16 +392,16 @@ async def type_purpose(message: types, state: FSMContext):
     await message.answer(
         "Hamkorligingiz uchun rahmat! \nTalablarimizga to’g’ri kelsangiz, sizga yaqin orada aloqaga chiqamiz. \n\nThank you for cooperation! \nWe will reach out to you soon if you meet our requirements. 🙂",
         reply_markup=ReplyKeyboardRemove(selective=True))
-    await state.finish()
+    await state.clear()
 
 
-@dp.message_handler(state=B1UserState.confirmation, text="Tahrirlash/Edit ✏️")
-async def type_purpose(message: types):
+@dp.message(StateFilter(B1UserState.confirmation), F.text == 'Tahrirlash/Edit ✏️')
+async def type_purpose(message: types, state: FSMContext):
     await message.answer(f"Iltimos, to'liq ism va familiyangizni kiriting! \n\nPlease, fill in your full name!")
-    await UserState.fullname.set()
+    await state.set_state(UserState.fullname)
 
 
-@dp.message_handler(state=B1UserState.confirmation, content_types=ContentTypes.ANY)
+@dp.message(StateFilter(B1UserState.confirmation))
 async def buttons(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!", reply_markup=B12UserKeyboard.confirmation)
 

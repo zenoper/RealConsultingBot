@@ -1,11 +1,12 @@
-from aiogram import types
-from aiogram.dispatcher.filters.builtin import CommandHelp
+from aiogram import F, types
+from aiogram.filters import Command
+from aiogram.enums import ContentType
 
 from loader import dp
 from data.config import ADMINS
 
 
-@dp.message_handler(CommandHelp(), state="*")
+@dp.message(F.content_type == ContentType.TEXT, Command("help"))
 async def bot_help(message: types.Message):
     if str(message.from_user.id) not in ADMINS:
         text = ("Commands: ",
