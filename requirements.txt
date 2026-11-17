@@ -1,2 +1,5 @@
-aiogram~=2.14
+aiogram==2.14
+aiohttp==3.14.5
+asyncpg==0.28.0
 environs~=8.0.0
+marshmallow<4
