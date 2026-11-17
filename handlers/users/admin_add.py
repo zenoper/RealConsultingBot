@@ -1,8 +1,9 @@
-from aiogram import types
-from aiogram.dispatcher import FSMContext
-import aiogram
-from aiogram.dispatcher.filters.builtin import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, InputFile
+from aiogram import F, types
+from aiogram.filters import Command, StateFilter
+from aiogram.enums import ContentType
+from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, BufferedInputFile
 
 from loader import dp, db, bot
 from data.config import ADMINS
@@ -16,50 +17,50 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Font
 
 
-@dp.message_handler(Command(["add_video"]), state="*")
-async def add_video(message: types):
+@dp.message(F.content_type == ContentType.TEXT, Command('add_video'))
+async def add_video(message: types, state: FSMContext):
     if str(message.from_user.id) == ADMINS[0]:
         await message.answer("Video jo'nating")
-        await AddVideo.start.set()
+        await state.set_state(AddVideo.start)
     else:
         await message.answer("You don't qualify bro :(")
 
 
-@dp.message_handler(content_types=types.ContentTypes.VIDEO, state=AddVideo.start)
+@dp.message(StateFilter(AddVideo.start), F.content_type == ContentType.VIDEO)
 async def add_video(message: types, state: FSMContext):
     file_id = message.video.file_id
     await state.update_data({"file_id": file_id})
     await message.answer("Endi keyword jo'nating")
-    await AddVideo.end.set()
+    await state.set_state(AddVideo.end)
 
 
-@dp.message_handler(content_types=types.ContentTypes.DOCUMENT, state=AddVideo.start)
+@dp.message(StateFilter(AddVideo.start), F.content_type == ContentType.DOCUMENT)
 async def add_video(message: types, state: FSMContext):
     file_id = message.document.file_id
     await state.update_data({"file_id": file_id})
     await message.answer("Endi keyword jo'nating")
-    await AddVideo.end.set()
+    await state.set_state(AddVideo.end)
 
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=AddVideo.start)
+@dp.message(StateFilter(AddVideo.start))
 async def add_video(message: types):
     await message.answer("Send me a video, you bastard")
 
 
-@dp.message_handler(state=AddVideo.end, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(AddVideo.end), F.content_type == ContentType.TEXT)
 async def add_text(message: types, state: FSMContext):
     keyword = message.text
     await state.update_data({"keyword": keyword})
     await message.answer("Now, send me the caption")
-    await AddVideo.caption.set()
+    await state.set_state(AddVideo.caption)
 
 
-@dp.message_handler(state=AddVideo.end, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(AddVideo.end))
 async def add_text(message: types):
     await message.answer("Send me text, you freaking bastard!")
 
 
-@dp.message_handler(state=AddVideo.caption, content_types=types.ContentTypes.TEXT)
+@dp.message(StateFilter(AddVideo.caption), F.content_type == ContentType.TEXT)
 async def add_text(message: types, state: FSMContext):
     try:
         caption = message.text
@@ -67,19 +68,19 @@ async def add_text(message: types, state: FSMContext):
         data_info = await state.get_data()
         file_id = data_info.get("file_id")
         keyword = data_info.get("keyword")
-        await message.answer_document(document=file_id, thumb=file_id, caption=f"{caption} \n\nKalit so'z : <b>{keyword}</b>")
+        await message.answer_document(document=file_id, caption=f"{caption} \n\nKalit so'z : <b>{keyword}</b>")
         await message.answer("Tasdiqlang:", reply_markup=confirm)
-        await AddVideo.confirm.set()
-    except aiogram.utils.exceptions.BadRequest:
+        await state.set_state(AddVideo.confirm)
+    except TelegramBadRequest:
         await message.answer("Caption or Keyword is too long!")
 
 
-@dp.message_handler(state=AddVideo.caption, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(AddVideo.caption))
 async def add_text(message: types):
     await message.answer("Only text bro!")
 
 
-@dp.message_handler(state=AddVideo.confirm, text="Confirm! ✅")
+@dp.message(StateFilter(AddVideo.confirm), F.text == 'Confirm! ✅')
 async def add_text(message: types, state: FSMContext):
     data = await state.get_data()
     try:
@@ -91,26 +92,26 @@ async def add_text(message: types, state: FSMContext):
         await message.answer("Added successfully! 🙂")
     except Exception as e:
         await message.answer(f"Couldn't add to database because:  <b>{e}</b> ")
-    await state.finish()
+    await state.clear()
 
 
-@dp.message_handler(state=AddVideo.confirm, text="Edit ✏️")
-async def add_text(message: types):
+@dp.message(StateFilter(AddVideo.confirm), F.text == 'Edit ✏️')
+async def add_text(message: types, state: FSMContext):
     await message.answer("Video jo'nating")
-    await AddVideo.start.set()
+    await state.set_state(AddVideo.start)
 
 
-@dp.message_handler(state=AddVideo.confirm, content_types=types.ContentTypes.ANY)
+@dp.message(StateFilter(AddVideo.confirm))
 async def add_text(message: types):
     await message.answer("CLICK THE BUTTONS BRUUUH")
 
 
 # DELETE VIDEO
 
-@dp.message_handler(Command(["delete_video"]), state="*")
-async def add_video(message: types):
+@dp.message(F.content_type == ContentType.TEXT, Command('delete_video'))
+async def add_video(message: types, state: FSMContext):
     if str(message.from_user.id) == ADMINS[0]:
-        await DeleteStates.select.set()
+        await state.set_state(DeleteStates.select)
         videos = await db.select_all_videos()
         if videos:
             delete_video = InlineKeyboardMarkup(
@@ -126,14 +127,14 @@ async def add_video(message: types):
         else:
             await message.answer(
                 "Sizda hozircha hech qanday ma'lumotlar saqlamagansiz. \n\nMa'lumot qo'shish uchun /add_video buyrug'ini bering")
-            await UserState.start.set()
+            await state.set_state(UserState.start)
     else:
         await message.answer("You don't qualify bro :(")
-        await UserState.start.set()
+        await state.set_state(UserState.start)
 
 
-@dp.callback_query_handler(state=DeleteStates.select)
-async def delete(call: CallbackQuery):
+@dp.callback_query(StateFilter(DeleteStates.select))
+async def delete(call: CallbackQuery, state: FSMContext):
     callback_data = call.data
     video = await db.select_video(keyword=str(callback_data))
     if video:
@@ -145,9 +146,9 @@ async def delete(call: CallbackQuery):
             ]
         )
         try:
-            await call.message.answer_video(video=video[3], thumb=video[3], caption=video[2],
+            await call.message.answer_video(video=video[3], caption=video[2],
                                             reply_markup=delete_keyboard)
-            await DeleteStates.delete.set()
+            await state.set_state(DeleteStates.delete)
         except Exception as e:
             await call.message.answer(f"Couldn't delete video bro. Here is the '{e}' mistake. Probably coz of keyword unique contraint has been broken.")
 
@@ -155,18 +156,18 @@ async def delete(call: CallbackQuery):
         await call.answer("Iltimos, tugmalardan birini tanlang!")
 
 
-@dp.callback_query_handler(state=DeleteStates.delete)
-async def delete(call: CallbackQuery):
+@dp.callback_query(StateFilter(DeleteStates.delete))
+async def delete(call: CallbackQuery, state: FSMContext):
     try:
         await db.delete_video(keyword=call.data)
         await call.message.answer("O'chirish muvaffaqiyatli amalga oshdi!")
-        await UserState.start.set()
+        await state.set_state(UserState.start)
     except Exception as e:
         await call.message.answer("O'chirish amalga oshmadi. Uzr :( \n\nQaytadan harakat qilib ko'ring : /delete")
         print(e)
 
 
-@dp.message_handler(Command(["download_data"]), state="*")
+@dp.message(F.content_type == ContentType.TEXT, Command('download_data'))
 async def add_video(message: types):
     if str(message.from_user.id) == ADMINS[0]:
         result = await db.select_all_users()
@@ -217,7 +218,7 @@ async def add_video(message: types):
             excel_buffer.seek(0)
 
             # Create InputFile from buffer
-            document = InputFile(excel_buffer, filename="UserInfo.xlsx")
+            document = BufferedInputFile(excel_buffer.getvalue(), filename="UserInfo.xlsx")
 
             # Send the document
             await message.answer_document(

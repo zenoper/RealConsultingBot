@@ -1,6 +1,8 @@
 import asyncpg.exceptions
-from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram import F, types
+from aiogram.filters import StateFilter
+from aiogram.enums import ContentType
+from aiogram.fsm.context import FSMContext
 from loader import dp, db, bot
 from states.userStates import UserState, GradeStates, TestStates, F1UserState
 from keyboards.default import UserKeyboard
@@ -8,15 +10,15 @@ from aiogram.types import ReplyKeyboardRemove
 from data.config import ADMINS
 
 
-@dp.message_handler(text="Maktabda o'qiyman | At high school", content_types=types.ContentTypes.TEXT, state=F1UserState.grade)
-async def school(message: types.Message):
+@dp.message(StateFilter(F1UserState.grade), F.text == "Maktabda o'qiyman | At high school")
+async def school(message: types.Message, state: FSMContext):
     await message.answer("Nechinchi sinfda o'qiysiz? \n\nWhat grade at high school are you in?", reply_markup=UserKeyboard.school)
-    await GradeStates.school.set()
+    await state.set_state(GradeStates.school)
 
 
-@dp.message_handler(text="9", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
-@dp.message_handler(text="10", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
-@dp.message_handler(text="11", content_types=types.ContentTypes.TEXT, state=GradeStates.school)
+@dp.message(StateFilter(GradeStates.school), F.text == '9')
+@dp.message(StateFilter(GradeStates.school), F.text == '10')
+@dp.message(StateFilter(GradeStates.school), F.text == '11')
 async def school(message: types.Message, state: FSMContext):
     grade = message.text
     if grade == "11":
@@ -26,15 +28,15 @@ async def school(message: types.Message, state: FSMContext):
         await state.update_data({"qualification": q_score})
     await state.update_data({'grade': f"{grade} sinf"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
-    await F1UserState.degree.set()
+    await state.set_state(F1UserState.degree)
 
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=GradeStates.school)
+@dp.message(StateFilter(GradeStates.school))
 async def school(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.school)
 
 
-@dp.message_handler(text="Maktabni bitirganman | In a gap year", content_types=types.ContentTypes.TEXT, state=F1UserState.grade)
+@dp.message(StateFilter(F1UserState.grade), F.text == 'Maktabni bitirganman | In a gap year')
 async def school(message: types.Message, state: FSMContext):
     qu_score = await state.get_data()
     q_score = qu_score.get("qualification")
@@ -42,19 +44,19 @@ async def school(message: types.Message, state: FSMContext):
     await state.update_data({"qualification": q_score})
     await state.update_data({"grade": "maktabni bitirgan/gap year"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
-    await F1UserState.degree.set()
+    await state.set_state(F1UserState.degree)
 
 
-@dp.message_handler(text="Universitetda o'qiyman | At university", content_types=types.ContentTypes.TEXT, state=F1UserState.grade)
-async def university(message: types.Message):
+@dp.message(StateFilter(F1UserState.grade), F.text == "Universitetda o'qiyman | At university")
+async def university(message: types.Message, state: FSMContext):
     await message.answer("Nechinchi kursda o'qiysiz? \n\nWhat year at university are you in?", reply_markup=UserKeyboard.university)
-    await GradeStates.university.set()
+    await state.set_state(GradeStates.university)
 
 
-@dp.message_handler(text="1", content_types=types.ContentTypes.TEXT, state=GradeStates.university)
-@dp.message_handler(text="2", content_types=types.ContentTypes.TEXT, state=GradeStates.university)
-@dp.message_handler(text="3", content_types=types.ContentTypes.TEXT, state=GradeStates.university)
-@dp.message_handler(text="4", content_types=types.ContentTypes.TEXT, state=GradeStates.university)
+@dp.message(StateFilter(GradeStates.university), F.text == '1')
+@dp.message(StateFilter(GradeStates.university), F.text == '2')
+@dp.message(StateFilter(GradeStates.university), F.text == '3')
+@dp.message(StateFilter(GradeStates.university), F.text == '4')
 async def university(message: types.Message, state: FSMContext):
     year = message.text
     qu_score = await state.get_data()
@@ -63,14 +65,14 @@ async def university(message: types.Message, state: FSMContext):
     await state.update_data({"qualification": q_score})
     await state.update_data({"grade": f"{year} kurs/year"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
-    await F1UserState.degree.set()
+    await state.set_state(F1UserState.degree)
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=GradeStates.university)
+@dp.message(StateFilter(GradeStates.university))
 async def school(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.university)
 
 
-@dp.message_handler(text="Universitetni bitirganman | Graduated university", content_types=types.ContentTypes.TEXT, state=F1UserState.grade)
+@dp.message(StateFilter(F1UserState.grade), F.text == 'Universitetni bitirganman | Graduated university')
 async def university(message: types.Message, state: FSMContext):
     qu_score = await state.get_data()
     q_score = qu_score.get("qualification")
@@ -78,33 +80,33 @@ async def university(message: types.Message, state: FSMContext):
     await state.update_data({"qualification": q_score})
     await state.update_data({"grade": "graduated university"})
     await message.answer("Qaysi darajada o'qimoqchisiz? Tanlang: \n\nWhat degree do you want to study at? Choose one:", reply_markup=UserKeyboard.degree)
-    await F1UserState.degree.set()
+    await state.set_state(F1UserState.degree)
 
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state= F1UserState.grade)
+@dp.message(StateFilter(F1UserState.grade))
 async def grade(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \n\nPlease, click one of the buttons!", reply_markup=UserKeyboard.grade)
 
 
-@dp.message_handler(text="Bakalavr | Bachelor's", content_types=types.ContentTypes.TEXT, state=F1UserState.degree)
+@dp.message(StateFilter(F1UserState.degree), F.text == "Bakalavr | Bachelor's")
 async def degree(message: types.Message, state: FSMContext):
     await state.update_data({"degree": "bachelor's"})
     await message.answer("Sizda IELTS yoki Duolingo bormi? \nNatijasi yuqorisini tanlang! \n\nDo you have IELTS or Duolingo score? \nChoose the one you have highest score from!", reply_markup=UserKeyboard.test_score)
-    await F1UserState.test_score.set()
-@dp.message_handler(text="Magistratura | Master's", content_types=types.ContentTypes.TEXT, state=F1UserState.degree)
+    await state.set_state(F1UserState.test_score)
+@dp.message(StateFilter(F1UserState.degree), F.text == "Magistratura | Master's")
 async def degree(message: types.Message, state: FSMContext):
     await state.update_data({"degree": "master's"})
     await message.answer("Sizda IELTS yoki Duolingo bormi? \nNatijasi yuqorisini tanlang! \n\nDo you have IELTS or Duolingo score? \nChoose the one you have highest score from!", reply_markup=UserKeyboard.test_score)
-    await F1UserState.test_score.set()
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=F1UserState.degree)
+    await state.set_state(F1UserState.test_score)
+@dp.message(StateFilter(F1UserState.degree))
 async def degree(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.degree)
 
 
-@dp.message_handler(text="IELTS", content_types=types.ContentTypes.TEXT, state=F1UserState.test_score)
-async def test_score(message: types.Message):
+@dp.message(StateFilter(F1UserState.test_score), F.text == 'IELTS')
+async def test_score(message: types.Message, state: FSMContext):
     await message.answer("IELTS balingiz nechchi? \n\nWhat is your IELTS score?")
-    await TestStates.ielts.set()
+    await state.set_state(TestStates.ielts)
 
 def is_float(value):
     try:
@@ -113,7 +115,7 @@ def is_float(value):
     except ValueError:
         return False
 
-@dp.message_handler(content_types=types.ContentTypes.TEXT, state=TestStates.ielts)
+@dp.message(StateFilter(TestStates.ielts), F.content_type == ContentType.TEXT)
 async def ielts(message: types.Message, state: FSMContext):
     ielts_of = message.text
     if message.text.isdigit() or is_float(message.text):
@@ -149,25 +151,25 @@ async def ielts(message: types.Message, state: FSMContext):
             msg += f"Test natijangiz/Test score - <b>{test_score_of}</b>"
 
             await message.answer(msg, reply_markup=UserKeyboard.confirmation)
-            await F1UserState.confirmation.set()
+            await state.set_state(F1UserState.confirmation)
         else:
             await message.answer("Javobingiz 3 xonadan oshmasligi kerak! \nMasalan: <b>6.5</b>  \n\nYour response can't have more than 3 characters! \nFor example: <b>6</b>")
     else:
         await message.answer("Iltimos, IELTS natijangizni to'g'ri formatda kiriting! \nMasalan: <b>6.5</b>  \n\nPlease, write your IELTS score in the correct format! \nFor example: <b>6</b>")
 
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=TestStates.ielts)
+@dp.message(StateFilter(TestStates.ielts))
 async def ielts(message: types.Message):
     await message.answer("Iltimos, faqat raqamlardan foydalananing! \n\nPLease, only use numbers!")
 
 
-@dp.message_handler(text="Duolingo", content_types=types.ContentTypes.TEXT, state=F1UserState.test_score)
-async def test_score(message: types.Message):
+@dp.message(StateFilter(F1UserState.test_score), F.text == 'Duolingo')
+async def test_score(message: types.Message, state: FSMContext):
     await message.answer("Duolingo balingiz nechchi? \n\nWhat is your Duolingo score?")
-    await TestStates.duolingo.set()
+    await state.set_state(TestStates.duolingo)
 
 
-@dp.message_handler(lambda message: message.text.isdigit(), content_types=types.ContentTypes.TEXT, state=TestStates.duolingo)
+@dp.message(StateFilter(TestStates.duolingo), F.content_type == ContentType.TEXT, lambda message: message.text.isdigit())
 async def ielts(message: types.Message, state: FSMContext):
     duolingo_of = message.text
     if len(duolingo_of) < 4:
@@ -202,20 +204,20 @@ async def ielts(message: types.Message, state: FSMContext):
         msg += f"Test natijangiz/Test score - <b>{test_score_of}</b>"
 
         await message.answer(msg, reply_markup=UserKeyboard.confirmation)
-        await F1UserState.confirmation.set()
+        await state.set_state(F1UserState.confirmation)
     else:
         await message.answer("Javobingiz 3 xonadan oshmasligi kerak! \nMasalan: <b>135</b>  \n\nYour response can't have more than 3 characters! \nFor example: <b>125</b>")
 
 
-@dp.message_handler(lambda message: not message.text.isdigit(), content_types=types.ContentTypes.TEXT, state=TestStates.duolingo)
+@dp.message(StateFilter(TestStates.duolingo), F.content_type == ContentType.TEXT, lambda message: not message.text.isdigit())
 async def ielts(message: types.Message):
     await message.answer("Iltimos, faqat raqamlardan foydalaning! \nMasalan: <b>135</b> \n\nPlease, only use numbers! \nFor example: <b>125</b>")
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=TestStates.duolingo)
+@dp.message(StateFilter(TestStates.duolingo))
 async def ielts(message: types.Message):
     await message.answer("Iltimos, faqat raqamlardan foydalaning! \nMasalan: <b>135</b> \n\nPlease, only use numbers! \nFor example: <b>125</b>")
 
 
-@dp.message_handler(text="Yo'q/None", content_types=types.ContentTypes.TEXT, state=F1UserState.test_score)
+@dp.message(StateFilter(F1UserState.test_score), F.text == "Yo'q/None")
 async def test_score(message: types.Message, state: FSMContext):
     await state.update_data({"test_score": "Yo'q/None"})
 
@@ -236,14 +238,14 @@ async def test_score(message: types.Message, state: FSMContext):
     msg += f"Test natijangiz/Test score - <b>{test_score_of}</b>"
 
     await message.answer(msg, reply_markup=UserKeyboard.confirmation)
-    await F1UserState.confirmation.set()
+    await state.set_state(F1UserState.confirmation)
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=F1UserState.test_score)
+@dp.message(StateFilter(F1UserState.test_score))
 async def score(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.test_score)
 
 
-@dp.message_handler(text="Tasdiqlash/Confirm! ✅", content_types=types.ContentTypes.TEXT, state=F1UserState.confirmation)
+@dp.message(StateFilter(F1UserState.confirmation), F.text == 'Tasdiqlash/Confirm! ✅')
 async def confirmation(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
 
@@ -326,7 +328,7 @@ async def confirmation(message: types.Message, state: FSMContext):
         #     "Siz <b>birinchi bosqichdan</b> muvaffaqiyatli o'tdingiz, ikkinchi bosqich anketasini to’ldirish uchun <a href='https://docs.google.com/forms/d/e/1FAIpQLSeTrLBMJj9fea9fbewEcmNtSQAZ0-7i2aQy_JI_7poFTSpR4w/viewform?usp=sharing'>quyidagi link</a> orqali o’tib anketa to’ldiring.",
         #     reply_markup=ReplyKeyboardRemove(selective=True))
 
-        await state.finish()
+        await state.clear()
     else:
         user_data = await state.get_data()
         q_scoree = user_data.get("qualification")
@@ -334,16 +336,16 @@ async def confirmation(message: types.Message, state: FSMContext):
             "Hamkorligingiz uchun rahmat! \nUzr, bizni talablarimizga to'g'ri kelmadingiz ❌. Test natijalaringiz yetarli darajada emas, yoki o'quv yilingiz va maqsadlaringiz bizning talablarimizga mos tushmaydi. \n\nThank you for cooperation! Sorry, but you don't meet our requirements ❌. Either you have a low test score or your current education level and educational goals don't suit.",
             reply_markup=ReplyKeyboardRemove(selective=True))
         await message.answer(" Talablar: \n\n🎓 Bakalavrga hozirda 11-sinfda o’qiyotgan yoki maktabni bitirgan bo'lishingiz kerak. \nIELTS 5.5 or above \nDuolingo 100 or above \n\n‍🎓 Magistratura uchun esa hozirda bakalavrda 4-kursda o’qiyotgan yoki allaqachon universitetni bitirgan bo’lishingiz zarur. \nIELTS 6 or above \nDuolingo 105 or above ")
-        await state.finish()
+        await state.clear()
 
 
-@dp.message_handler(text="Tahrirlash/Edit ✏️", content_types=types.ContentTypes.TEXT, state=F1UserState.confirmation)
-async def edit(message: types.Message):
+@dp.message(StateFilter(F1UserState.confirmation), F.text == 'Tahrirlash/Edit ✏️')
+async def edit(message: types.Message, state: FSMContext):
     await message.answer("Iltimos, to'liq ismingizni kiriting! \n\nPlease, fill in your full name!")
-    await UserState.fullname.set()
+    await state.set_state(UserState.fullname)
 
 
-@dp.message_handler(content_types=types.ContentTypes.ANY, state=F1UserState.confirmation)
+@dp.message(StateFilter(F1UserState.confirmation))
 async def confirmation(message: types.Message):
     await message.answer("Iltimos, tugmalardan birini bosing! \nPlease, click one of the buttons!", reply_markup=UserKeyboard.confirmation)
 
